@@ -1,0 +1,165 @@
+{
+  "app": {
+    "name": "Let's Eat"
+  },
+  "welcome": {
+    "tagline": "Discover where to eat today",
+    "createAccount": "Create account with e-mail",
+    "googleLogin": "Continue with Google",
+    "guestLogin": "Enter as guest",
+    "terms": "By continuing, you agree to our",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "register": {
+    "title": "Create your account",
+    "email": "E-mail",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "consent": "I have read and accept the Privacy Policy",
+    "submit": "Create Account",
+    "passwordMismatch": "Passwords do not match",
+    "weakPassword": "Password must be at least 8 characters",
+    "emailInUse": "This email is already in use",
+    "invalidEmail": "Invalid email"
+  },
+  "onboarding": {
+    "title": "Let's get to know you! 👋",
+    "name": "Your name",
+    "age": "Your age",
+    "foodQuestion": "What types of food do you like?",
+    "continue": "Continue",
+    "skip": "Skip for now"
+  },
+  "home": {
+    "greeting": "Hi, {{name}}! 👋",
+    "greetingDefault": "Hi there! 👋",
+    "question": "What are we eating today?",
+    "letsEat": "Let's Eat?",
+    "recentVisits": "Recent visits",
+    "noHistory": "No recent visits"
+  },
+  "choiceModal": {
+    "title": "How do you want to choose today?",
+    "searchTitle": "I know what I want",
+    "searchDesc": "Search by type, event, and price range",
+    "surpriseTitle": "Surprise me!",
+    "surpriseDesc": "Let us choose for you",
+    "cancel": "Cancel"
+  },
+  "search": {
+    "title": "Search",
+    "cuisineType": "Cuisine type",
+    "eventType": "Event type",
+    "priceRange": "Price range",
+    "radius": "Search radius",
+    "radiusValue": "{{value}} km",
+    "submit": "Search 🔍",
+    "results": "{{count}} results",
+    "noResults": "No restaurants found",
+    "noResultsDesc": "Try expanding the radius or changing filters",
+    "openNow": "Open now",
+    "closed": "Closed"
+  },
+  "surprise": {
+    "title": "Surprise me!",
+    "radius": "Radius",
+    "price": "Price",
+    "swipeHint": "Swipe up to reveal",
+    "swipeAgain": "Not feeling it? Swipe again!",
+    "noMore": "No more restaurants in this radius",
+    "minRating": "Only restaurants ⭐ 4.5+"
+  },
+  "restaurant": {
+    "googleRating": "Google",
+    "appRating": "Let's Eat",
+    "openNow": "Open",
+    "closedNow": "Closed",
+    "viewOnMap": "View on map",
+    "call": "Call",
+    "website": "Website",
+    "communityReviews": "Community reviews",
+    "noReviews": "No reviews yet",
+    "writeReview": "Write a review",
+    "reviews": "{{count}} reviews"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "searchPlaceholder": "Search restaurant...",
+    "filterType": "Type",
+    "filterPrice": "Price",
+    "filterRating": "Rating",
+    "ago": "{{time}} ago"
+  },
+  "writeReview": {
+    "title": "Write a review",
+    "rating": "Your rating",
+    "comment": "Your comment",
+    "commentPlaceholder": "Tell us about your experience...",
+    "eventType": "Visit type (optional)",
+    "submit": "Publish review",
+    "success": "Review published!",
+    "error": "Error publishing review"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "unlocked": "Unlocked",
+    "inProgress": "In progress",
+    "locked": "Locked",
+    "progress": "{{current}}/{{target}}"
+  },
+  "settings": {
+    "title": "Settings",
+    "editProfile": "Edit profile",
+    "preferences": "Preferences",
+    "language": "Language",
+    "defaultRadius": "Default radius",
+    "favoriteCuisines": "Favorite cuisines",
+    "defaultPrice": "Price range",
+    "privacy": "Privacy",
+    "privacyPolicy": "Privacy Policy",
+    "exportData": "Export my data",
+    "deleteAccount": "Delete my account",
+    "account": "Account",
+    "linkGoogle": "Link Google account",
+    "linkEmail": "Link email/password",
+    "logout": "Log out",
+    "version": "Version",
+    "deleteConfirm": "Are you sure? All your data will be permanently deleted.",
+    "deleteConfirmButton": "Yes, delete everything",
+    "cancel": "Cancel",
+    "logoutConfirm": "Do you really want to log out?",
+    "portuguese": "Portuguese",
+    "english": "English"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "noInternet": "No internet connection",
+    "apiLimit": "Search limit reached. Try again later.",
+    "locationPermission": "We need your location to find restaurants",
+    "locationDisabled": "Enable location in your device settings"
+  },
+  "common": {
+    "loading": "Loading...",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "km": "km"
+  },
+  "tabs": {
+    "eat": "Eat",
+    "reviews": "Reviews",
+    "achievements": "Achievements",
+    "settings": "Settings"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: {{date}}"
+  }
+}

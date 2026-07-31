@@ -1,0 +1,165 @@
+{
+  "app": {
+    "name": "Let's Eat"
+  },
+  "welcome": {
+    "tagline": "Descubra onde comer hoje",
+    "createAccount": "Criar conta com e-mail",
+    "googleLogin": "Continuar com Google",
+    "guestLogin": "Entrar como convidado",
+    "terms": "Ao continuar, você concorda com nossa",
+    "privacyPolicy": "Política de Privacidade"
+  },
+  "register": {
+    "title": "Criar sua conta",
+    "email": "E-mail",
+    "password": "Senha",
+    "confirmPassword": "Confirmar senha",
+    "consent": "Li e aceito a Política de Privacidade",
+    "submit": "Criar Conta",
+    "passwordMismatch": "As senhas não coincidem",
+    "weakPassword": "A senha deve ter pelo menos 8 caracteres",
+    "emailInUse": "Este e-mail já está em uso",
+    "invalidEmail": "E-mail inválido"
+  },
+  "onboarding": {
+    "title": "Vamos nos conhecer! 👋",
+    "name": "Seu nome",
+    "age": "Sua idade",
+    "foodQuestion": "Que tipos de comida você curte?",
+    "continue": "Continuar",
+    "skip": "Pular por agora"
+  },
+  "home": {
+    "greeting": "Olá, {{name}}! 👋",
+    "greetingDefault": "Olá! 👋",
+    "question": "O que vamos comer hoje?",
+    "letsEat": "Vamos Comer?",
+    "recentVisits": "Últimas visitas",
+    "noHistory": "Nenhuma visita recente"
+  },
+  "choiceModal": {
+    "title": "Como quer escolher hoje?",
+    "searchTitle": "Eu sei o que quero",
+    "searchDesc": "Buscar por tipo, evento e faixa de preço",
+    "surpriseTitle": "Quero ser surpreendido!",
+    "surpriseDesc": "Deixa que a gente escolhe pra você",
+    "cancel": "Cancelar"
+  },
+  "search": {
+    "title": "Buscar",
+    "cuisineType": "Tipo de comida",
+    "eventType": "Tipo de evento",
+    "priceRange": "Faixa de preço",
+    "radius": "Raio de busca",
+    "radiusValue": "{{value}} km",
+    "submit": "Buscar 🔍",
+    "results": "{{count}} resultados",
+    "noResults": "Nenhum restaurante encontrado",
+    "noResultsDesc": "Tente expandir o raio ou mudar os filtros",
+    "openNow": "Aberto agora",
+    "closed": "Fechado"
+  },
+  "surprise": {
+    "title": "Surpreenda-me!",
+    "radius": "Raio",
+    "price": "Preço",
+    "swipeHint": "Arraste para cima para revelar",
+    "swipeAgain": "Não curtiu? Arraste de novo!",
+    "noMore": "Sem mais restaurantes nesse raio",
+    "minRating": "Apenas restaurantes ⭐ 4.5+"
+  },
+  "restaurant": {
+    "googleRating": "Google",
+    "appRating": "Let's Eat",
+    "openNow": "Aberto",
+    "closedNow": "Fechado",
+    "viewOnMap": "Ver no mapa",
+    "call": "Ligar",
+    "website": "Site",
+    "communityReviews": "Avaliações da comunidade",
+    "noReviews": "Ainda sem avaliações",
+    "writeReview": "Escrever avaliação",
+    "reviews": "{{count}} avaliações"
+  },
+  "reviews": {
+    "title": "Avaliações",
+    "searchPlaceholder": "Buscar restaurante...",
+    "filterType": "Tipo",
+    "filterPrice": "Preço",
+    "filterRating": "Nota",
+    "ago": "há {{time}}"
+  },
+  "writeReview": {
+    "title": "Escrever avaliação",
+    "rating": "Sua nota",
+    "comment": "Seu comentário",
+    "commentPlaceholder": "Conte como foi sua experiência...",
+    "eventType": "Tipo de visita (opcional)",
+    "submit": "Publicar avaliação",
+    "success": "Avaliação publicada!",
+    "error": "Erro ao publicar avaliação"
+  },
+  "achievements": {
+    "title": "Conquistas",
+    "unlocked": "Desbloqueadas",
+    "inProgress": "Em progresso",
+    "locked": "Bloqueadas",
+    "progress": "{{current}}/{{target}}"
+  },
+  "settings": {
+    "title": "Configurações",
+    "editProfile": "Editar perfil",
+    "preferences": "Preferências",
+    "language": "Idioma",
+    "defaultRadius": "Raio padrão",
+    "favoriteCuisines": "Comidas favoritas",
+    "defaultPrice": "Faixa de preço",
+    "privacy": "Privacidade",
+    "privacyPolicy": "Política de Privacidade",
+    "exportData": "Exportar meus dados",
+    "deleteAccount": "Excluir minha conta",
+    "account": "Conta",
+    "linkGoogle": "Vincular conta Google",
+    "linkEmail": "Vincular e-mail/senha",
+    "logout": "Sair",
+    "version": "Versão",
+    "deleteConfirm": "Tem certeza? Todos os seus dados serão apagados permanentemente.",
+    "deleteConfirmButton": "Sim, excluir tudo",
+    "cancel": "Cancelar",
+    "logoutConfirm": "Deseja realmente sair?",
+    "portuguese": "Português",
+    "english": "Inglês"
+  },
+  "errors": {
+    "generic": "Algo deu errado. Tente novamente.",
+    "noInternet": "Sem conexão com a internet",
+    "apiLimit": "Limite de buscas atingido. Tente mais tarde.",
+    "locationPermission": "Precisamos da sua localização para buscar restaurantes",
+    "locationDisabled": "Ative a localização nas configurações do dispositivo"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "retry": "Tentar novamente",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "done": "Concluído",
+    "close": "Fechar",
+    "yes": "Sim",
+    "no": "Não",
+    "km": "km"
+  },
+  "tabs": {
+    "eat": "Comer",
+    "reviews": "Avaliações",
+    "achievements": "Conquistas",
+    "settings": "Configurações"
+  },
+  "privacy": {
+    "title": "Política de Privacidade",
+    "lastUpdated": "Última atualização: {{date}}"
+  }
+}

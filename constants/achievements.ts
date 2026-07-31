@@ -1,0 +1,133 @@
+export interface AchievementDef {
+  key: string;
+  titlePt: string;
+  titleEn: string;
+  descriptionPt: string;
+  descriptionEn: string;
+  emoji: string;
+  target: number;
+  category: 'usage' | 'cuisine' | 'social' | 'review' | 'special';
+}
+
+export const ACHIEVEMENTS: AchievementDef[] = [
+  {
+    key: 'welcome',
+    titlePt: 'Boas-vindas!',
+    titleEn: 'Welcome!',
+    descriptionPt: 'Abriu o app pela primeira vez',
+    descriptionEn: 'Opened the app for the first time',
+    emoji: '🎉',
+    target: 1,
+    category: 'usage',
+  },
+  {
+    key: 'pasta_fan',
+    titlePt: 'Fã de Massa',
+    titleEn: 'Pasta Fan',
+    descriptionPt: 'Visitou 3 restaurantes italianos',
+    descriptionEn: 'Visited 3 Italian restaurants',
+    emoji: '🍝',
+    target: 3,
+    category: 'cuisine',
+  },
+  {
+    key: 'oriental_explorer',
+    titlePt: 'Explorador Oriental',
+    titleEn: 'Oriental Explorer',
+    descriptionPt: 'Visitou 3 restaurantes japoneses ou chineses',
+    descriptionEn: 'Visited 3 Japanese or Chinese restaurants',
+    emoji: '🏯',
+    target: 3,
+    category: 'cuisine',
+  },
+  {
+    key: 'fearless',
+    titlePt: 'Sem Medo de Errar',
+    titleEn: 'Fearless',
+    descriptionPt: 'Usou "Quero ser surpreendido" 5 vezes',
+    descriptionEn: 'Used "Surprise me" 5 times',
+    emoji: '🎲',
+    target: 5,
+    category: 'usage',
+  },
+  {
+    key: 'food_critic',
+    titlePt: 'Crítico Gastronômico',
+    titleEn: 'Food Critic',
+    descriptionPt: 'Postou 10 avaliações',
+    descriptionEn: 'Posted 10 reviews',
+    emoji: '✍️',
+    target: 10,
+    category: 'review',
+  },
+  {
+    key: 'date_night',
+    titlePt: 'Rolê a Dois',
+    titleEn: 'Date Night',
+    descriptionPt: '3 saídas marcadas como casal',
+    descriptionEn: '3 outings marked as couple',
+    emoji: '💕',
+    target: 3,
+    category: 'social',
+  },
+  {
+    key: 'squad',
+    titlePt: 'Panelinha',
+    titleEn: 'The Squad',
+    descriptionPt: '3 saídas marcadas como amigos',
+    descriptionEn: '3 outings marked as friends',
+    emoji: '👥',
+    target: 3,
+    category: 'social',
+  },
+  {
+    key: 'weekend_regular',
+    titlePt: 'Fim de Semana Fiel',
+    titleEn: 'Weekend Regular',
+    descriptionPt: 'Usou o app 4 sábados seguidos',
+    descriptionEn: 'Used the app 4 Saturdays in a row',
+    emoji: '📅',
+    target: 4,
+    category: 'usage',
+  },
+  {
+    key: 'lucky_one',
+    titlePt: 'Sortudo(a)',
+    titleEn: 'Lucky One',
+    descriptionPt: 'Restaurante surpresa avaliado com 5 estrelas',
+    descriptionEn: 'Surprise restaurant rated 5 stars',
+    emoji: '🍀',
+    target: 1,
+    category: 'special',
+  },
+  {
+    key: 'world_traveler',
+    titlePt: 'Volta ao Mundo',
+    titleEn: 'World Traveler',
+    descriptionPt: 'Visitou 5 tipos de cozinha diferentes',
+    descriptionEn: 'Visited 5 different cuisine types',
+    emoji: '🌍',
+    target: 5,
+    category: 'cuisine',
+  },
+  {
+    key: 'first_review',
+    titlePt: 'Primeira Opinião',
+    titleEn: 'First Review',
+    descriptionPt: 'Postou a primeira avaliação',
+    descriptionEn: 'Posted first review',
+    emoji: '📝',
+    target: 1,
+    category: 'review',
+  },
+  {
+    key: 'night_owl',
+    titlePt: 'Coruja',
+    titleEn: 'Night Owl',
+    descriptionPt: 'Usou o app após 22h, 3 vezes',
+    descriptionEn: 'Used the app after 10pm, 3 times',
+    emoji: '🦉',
+    target: 3,
+    category: 'usage',
+  },
+];
