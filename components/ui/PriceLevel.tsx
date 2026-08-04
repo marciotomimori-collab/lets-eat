@@ -66,6 +66,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sign: {
-    fontFamily: Typography.fonts.bold,
+    fontFamily: Typography.fontFamily.bold,
   },
 });

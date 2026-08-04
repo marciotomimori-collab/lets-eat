@@ -10,7 +10,7 @@ import Chip from '../../components/ui/Chip';
 import { useTranslation } from 'react-i18next';
 import { updateUserProfile } from '../../services/firebase/firestore';
 import { CUISINE_TYPES } from '../../constants/cuisineTypes';
-import { useAuthStore } from '../../stores/useAuthStore';
+import { useAuthStore } from '../../stores/authStore';
 
 export default function OnboardingScreen() {
   const { t } = useTranslation();
@@ -109,11 +109,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   content: {
-    padding: Spacing.l,
+    padding: Spacing.lg,
     paddingTop: Spacing.xxl,
   },
   spacer: {
-    height: Spacing.m,
+    height: Spacing.md,
   },
   title: {
     ...Typography.h1,
@@ -124,12 +124,12 @@ const styles = StyleSheet.create({
     ...Typography.h3,
     color: Colors.text,
     marginTop: Spacing.xl,
-    marginBottom: Spacing.m,
+    marginBottom: Spacing.md,
   },
   chipGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.s,
+    gap: Spacing.sm,
     marginBottom: Spacing.xl,
   },
   chip: {
@@ -137,12 +137,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   button: {
-    marginTop: Spacing.m,
+    marginTop: Spacing.md,
   },
   skipButton: {
     alignItems: 'center',
-    padding: Spacing.m,
-    marginTop: Spacing.s,
+    padding: Spacing.md,
+    marginTop: Spacing.sm,
   },
   skipText: {
     ...Typography.body,

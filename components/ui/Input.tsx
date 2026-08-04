@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   label: {
-    fontFamily: Typography.fonts.medium,
+    fontFamily: Typography.fontFamily.medium,
     fontSize: Typography.sizes.sm,
     color: '#374151',
     marginBottom: Spacing.xs,
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     paddingHorizontal: Spacing.md,
-    fontFamily: Typography.fonts.regular,
+    fontFamily: Typography.fontFamily.regular,
     fontSize: Typography.sizes.md,
     color: '#111827',
   },
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     paddingRight: Spacing.md,
   },
   errorText: {
-    fontFamily: Typography.fonts.regular,
+    fontFamily: Typography.fontFamily.regular,
     fontSize: Typography.sizes.xs,
     color: Colors.error,
     marginTop: Spacing.xs,

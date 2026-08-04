@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   title: {
-    fontFamily: Typography.fonts.semiBold,
+    fontFamily: Typography.fontFamily.semiBold,
     fontSize: Typography.sizes.lg,
     color: '#111827',
   },

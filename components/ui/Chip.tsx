@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     marginRight: Spacing.xs,
   },
   label: {
-    fontFamily: Typography.fonts.medium,
+    fontFamily: Typography.fontFamily.medium,
     fontSize: Typography.sizes.sm,
   },
   selectedLabel: {

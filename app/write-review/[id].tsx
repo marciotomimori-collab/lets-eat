@@ -4,6 +4,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Typography, Spacing, BorderRadius } from '../../constants/theme';
+import { createReview } from '../../services/firebase/firestore';
+import { useAuthStore } from '../../stores/authStore';
 
 export default function WriteReviewScreen() {
   const { id } = useLocalSearchParams();
@@ -11,11 +14,23 @@ export default function WriteReviewScreen() {
   const router = useRouter();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const { user } = useAuthStore();
 
-  const handleSubmit = () => {
-    if (rating === 0) return;
-    // Call createReview logic here
-    router.back();
+  const handleSubmit = async () => {
+    if (rating === 0 || !user?.uid) return;
+    setSubmitting(true);
+    try {
+      await createReview(user.uid, user.email?.split('@')[0] || 'User', {
+        placeId: id as string,
+        rating,
+        comment,
+      });
+      router.back();
+    } catch(e) {
+      console.error(e);
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -54,11 +69,11 @@ export default function WriteReviewScreen() {
         />
 
         <TouchableOpacity 
-          style={[styles.submitBtn, rating === 0 && styles.submitBtnDisabled]} 
+          style={[styles.submitBtn, (rating === 0 || submitting) && styles.submitBtnDisabled]} 
           onPress={handleSubmit}
-          disabled={rating === 0}
+          disabled={rating === 0 || submitting}
         >
-          <Text style={styles.submitBtnText}>{t('common.submit', 'Enviar Avaliação')}</Text>
+          <Text style={styles.submitBtnText}>{submitting ? 'Enviando...' : t('common.submit', 'Enviar Avaliação')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -66,15 +81,15 @@ export default function WriteReviewScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, paddingTop: 60, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  headerTitle: { fontSize: 18, fontFamily: 'Inter-Bold', color: '#333' },
-  content: { padding: 24, alignItems: 'center' },
-  restaurantName: { fontSize: 24, fontFamily: 'Inter-Bold', color: '#333', marginBottom: 32 },
-  starsContainer: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  ratingHint: { color: '#666', marginBottom: 40, fontFamily: 'Inter-Regular', fontSize: 16 },
-  input: { width: '100%', backgroundColor: '#f9f9f9', borderWidth: 1, borderColor: '#eee', borderRadius: 16, padding: 20, fontSize: 16, fontFamily: 'Inter-Regular', minHeight: 160, marginBottom: 40 },
-  submitBtn: { width: '100%', backgroundColor: Colors?.primary || '#E53935', paddingVertical: 18, borderRadius: 16, alignItems: 'center' },
-  submitBtnDisabled: { backgroundColor: '#ccc' },
-  submitBtnText: { color: '#fff', fontSize: 18, fontFamily: 'Inter-Bold' }
+  container: { flex: 1, backgroundColor: Colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: Spacing.lg, paddingTop: 60, borderBottomWidth: 1, borderBottomColor: Colors.divider },
+  headerTitle: { ...Typography.h3, color: Colors.text },
+  content: { padding: Spacing.xxl, alignItems: 'center' },
+  restaurantName: { ...Typography.h2, color: Colors.text, marginBottom: Spacing.xxxl },
+  starsContainer: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md },
+  ratingHint: { color: Colors.textSecondary, marginBottom: Spacing.section, ...Typography.body1 },
+  input: { width: '100%', backgroundColor: Colors.lightGray, borderWidth: 1, borderColor: Colors.borderLight, borderRadius: BorderRadius.lg, padding: Spacing.xl, ...Typography.body1, minHeight: 160, marginBottom: Spacing.section },
+  submitBtn: { width: '100%', backgroundColor: Colors.primary, paddingVertical: 18, borderRadius: BorderRadius.lg, alignItems: 'center' },
+  submitBtnDisabled: { backgroundColor: Colors.border },
+  submitBtnText: { color: Colors.surface, fontFamily: Typography.fontFamily.bold, ...Typography.body1 }
 });

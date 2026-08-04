@@ -4,23 +4,28 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
+import { Typography, Spacing, BorderRadius } from '../constants/theme';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { useGooglePlaces } from '../hooks/useGooglePlaces';
+import { useSearchStore } from '../stores/searchStore';
+import { RestaurantCardData } from '../types/restaurant';
+import { RestaurantCard } from '../components/home/RestaurantCard';
 
 export default function SearchResultsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams();
-  const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState([]);
-  const [error, setError] = useState(null);
+  const { searchByText, isLoading, error } = useGooglePlaces();
+  const { searchQuery, filters } = useSearchStore();
+  const [results, setResults] = useState<RestaurantCardData[]>([]);
 
   useEffect(() => {
-    // Mocking API call with useGooglePlaces logic
-    setTimeout(() => {
-      setLoading(false);
-      // setResults([{ id: '1', name: 'Mock Restaurant', rating: 4.5 }]);
-    }, 1500);
-  }, [params]);
+    if (searchQuery) {
+      searchByText({ textQuery: searchQuery, ...filters }).then(data => {
+        setResults(data);
+      });
+    }
+  }, [searchQuery, filters]);
 
   return (
     <View style={styles.container}>
@@ -31,7 +36,7 @@ export default function SearchResultsScreen() {
         <Text style={styles.headerTitle}>{results.length} {t('search.resultsFound', 'resultados encontrados')}</Text>
       </View>
       
-      {loading ? (
+      {isLoading ? (
         <LoadingSpinner fullScreen />
       ) : error ? (
         <View style={styles.center}>
@@ -40,13 +45,15 @@ export default function SearchResultsScreen() {
       ) : (
         <FlatList 
           data={results}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.placeId}
           renderItem={({item}) => (
-            <View style={styles.card}><Text>{item.name}</Text></View>
+            <View style={{ marginHorizontal: Spacing.lg, marginBottom: Spacing.md }}>
+              <RestaurantCard data={item} onPress={(id) => router.push(`/restaurant/${id}`)} />
+            </View>
           )}
           ListEmptyComponent={() => (
             <View style={styles.emptyState}>
-              <Ionicons name="search-outline" size={64} color="#ccc" />
+              <Ionicons name="search-outline" size={64} color={Colors.textSecondary} />
               <Text style={styles.emptyText}>{t('search.noResults', 'Nenhum restaurante encontrado')}</Text>
               <TouchableOpacity style={styles.retryBtn} onPress={() => router.back()}>
                 <Text style={styles.retryText}>{t('common.retry', 'Tentar novamente')}</Text>
@@ -60,15 +67,15 @@ export default function SearchResultsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 50, paddingBottom: 16, backgroundColor: '#fff', elevation: 2 },
-  backBtn: { marginRight: 16 },
-  headerTitle: { fontSize: 18, fontFamily: 'Inter-Bold', color: '#333' },
+  container: { flex: 1, backgroundColor: Colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.lg, paddingTop: 50, paddingBottom: Spacing.lg, backgroundColor: Colors.surface, elevation: 2 },
+  backBtn: { marginRight: Spacing.lg },
+  headerTitle: { ...Typography.h3, color: Colors.text },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 150 },
-  emptyText: { marginTop: 16, color: '#666', fontSize: 16, marginBottom: 24, fontFamily: 'Inter-Regular' },
-  retryBtn: { backgroundColor: Colors?.primary || '#E53935', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 },
-  retryText: { color: '#fff', fontFamily: 'Inter-Bold' },
-  card: { padding: 16, backgroundColor: '#fff', margin: 16, borderRadius: 8 },
-  errorText: { color: 'red', fontFamily: 'Inter-SemiBold' }
+  emptyText: { marginTop: Spacing.lg, color: Colors.textSecondary, ...Typography.body1, marginBottom: Spacing.xxl },
+  retryBtn: { backgroundColor: Colors.primary, paddingHorizontal: Spacing.xxl, paddingVertical: Spacing.md, borderRadius: BorderRadius.sm },
+  retryText: { color: Colors.surface, fontFamily: Typography.fontFamily.bold },
+  card: { padding: Spacing.lg, backgroundColor: Colors.surface, margin: Spacing.lg, borderRadius: BorderRadius.sm },
+  errorText: { color: Colors.error, fontFamily: Typography.fontFamily.semiBold }
 });

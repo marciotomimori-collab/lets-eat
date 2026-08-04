@@ -9,10 +9,10 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors?.primary || '#E53935',
-        tabBarInactiveTintColor: '#9e9e9e',
+        tabBarActiveTintColor: Colors.primary,
+        tabBarInactiveTintColor: Colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: Colors.surface,
           borderTopWidth: 0,
           elevation: 8,
           shadowColor: '#000',
@@ -26,7 +26,7 @@ export default function TabsLayout() {
           paddingTop: 8,
         },
         tabBarLabelStyle: {
-          fontFamily: 'Inter-SemiBold',
+          fontFamily: 'Inter_600SemiBold',
           fontSize: 12,
           fontWeight: 'bold',
         },

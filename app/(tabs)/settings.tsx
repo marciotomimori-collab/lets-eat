@@ -4,12 +4,15 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Typography, Spacing, BorderRadius } from '../../constants/theme';
 import { useAuthStore } from '../../stores/authStore';
+import { useUserStore } from '../../stores/userStore';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
+  const { profile } = useUserStore();
 
   const handleLogout = () => {
     Alert.alert(
@@ -51,10 +54,10 @@ export default function SettingsScreen() {
       <Text style={styles.header}>{t('settings.title', 'Configurações')}</Text>
       
       <View style={styles.profileCard}>
-        <View style={styles.avatar}><Text style={styles.avatarText}>LE</Text></View>
+        <View style={styles.avatar}><Text style={styles.avatarText}>{profile?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}</Text></View>
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>Usuário Teste</Text>
-          <Text style={styles.profileEmail}>usuario@letseat.com</Text>
+          <Text style={styles.profileName}>{profile?.name || 'Usuário Teste'}</Text>
+          <Text style={styles.profileEmail}>{user?.email || 'usuario@letseat.com'}</Text>
         </View>
         <TouchableOpacity><Text style={styles.editBtn}>{t('settings.edit', 'Editar')}</Text></TouchableOpacity>
       </View>
@@ -86,20 +89,20 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  header: { fontSize: 28, fontFamily: 'Inter-Bold', marginVertical: 24, marginHorizontal: 16, color: '#333', paddingTop: 40 },
-  profileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 16, marginBottom: 24, marginHorizontal: 16, borderRadius: 12 },
-  avatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: Colors?.primary || '#E53935', alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#fff', fontSize: 18, fontFamily: 'Inter-Bold' },
-  profileInfo: { flex: 1, marginLeft: 12 },
-  profileName: { fontSize: 18, fontFamily: 'Inter-Bold', color: '#333' },
-  profileEmail: { fontSize: 14, color: '#666', fontFamily: 'Inter-Regular' },
-  editBtn: { color: Colors?.primary || '#E53935', fontFamily: 'Inter-SemiBold' },
-  sectionHeader: { fontSize: 13, fontFamily: 'Inter-Bold', color: '#888', textTransform: 'uppercase', marginHorizontal: 16, marginBottom: 8 },
-  section: { backgroundColor: '#fff', borderRadius: 12, marginHorizontal: 16, marginBottom: 24, overflow: 'hidden' },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  container: { flex: 1, backgroundColor: Colors.background },
+  header: { ...Typography.h1, marginVertical: Spacing.xxl, marginHorizontal: Spacing.lg, color: Colors.text, paddingTop: Spacing.xxl },
+  profileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, padding: Spacing.lg, marginBottom: Spacing.xxl, marginHorizontal: Spacing.lg, borderRadius: BorderRadius.md },
+  avatar: { width: 50, height: 50, borderRadius: BorderRadius.full, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: Colors.surface, ...Typography.h3 },
+  profileInfo: { flex: 1, marginLeft: Spacing.md },
+  profileName: { ...Typography.h3, color: Colors.text },
+  profileEmail: { ...Typography.body2, color: Colors.textSecondary },
+  editBtn: { color: Colors.primary, ...Typography.body1, fontFamily: Typography.fontFamily.semiBold },
+  sectionHeader: { ...Typography.label, color: Colors.textSecondary, textTransform: 'uppercase', marginHorizontal: Spacing.lg, marginBottom: Spacing.sm },
+  section: { backgroundColor: Colors.surface, borderRadius: BorderRadius.md, marginHorizontal: Spacing.lg, marginBottom: Spacing.xxl, overflow: 'hidden' },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: Spacing.lg, borderBottomWidth: 1, borderBottomColor: Colors.borderLight },
   rowLeft: { flexDirection: 'row', alignItems: 'center' },
-  rowIcon: { marginRight: 12 },
-  rowTitle: { fontSize: 16, fontFamily: 'Inter-Regular' },
-  version: { textAlign: 'center', color: '#999', marginBottom: 40, marginTop: 10, fontFamily: 'Inter-Regular' }
+  rowIcon: { marginRight: Spacing.md },
+  rowTitle: { ...Typography.body1 },
+  version: { textAlign: 'center', color: Colors.textSecondary, marginBottom: Spacing.section, marginTop: Spacing.sm, ...Typography.body2 }
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Colors } from '../../constants/colors';
+import Colors from '../../constants/colors';
 import { Spacing, BorderRadius, Typography, Shadows } from '../../constants/theme';
 import { RestaurantCardData } from '../../types/restaurant';
 
@@ -10,18 +10,26 @@ interface Props {
 }
 
 export const RestaurantCard: React.FC<Props> = ({ data, onPress }) => {
-  const priceDisplay = '$'.repeat(data.priceLevel || 1);
+  const priceDisplay = '$'.repeat(
+    typeof data.priceLevel === 'string'
+      ? data.priceLevel === 'INEXPENSIVE' ? 1 
+      : data.priceLevel === 'MODERATE' ? 2
+      : data.priceLevel === 'EXPENSIVE' ? 3
+      : data.priceLevel === 'VERY_EXPENSIVE' ? 4 : 1
+    : 1
+  );
   const distanceDisplay = data.distance ? `${data.distance.toFixed(1)} km` : '';
+  const cuisineText = data.types?.length ? data.types[0] : '';
 
   return (
     <TouchableOpacity
       style={styles.cardContainer}
       activeOpacity={0.8}
-      onPress={() => onPress(data.id)}
+      onPress={() => onPress(data.placeId)}
     >
       <View style={styles.imageContainer}>
-        {data.photoUrl ? (
-          <Image source={{ uri: data.photoUrl }} style={styles.image} />
+        {data.photoUri ? (
+          <Image source={{ uri: data.photoUri }} style={styles.image} />
         ) : (
           <View style={styles.placeholderImage}>
             <Text style={styles.placeholderEmoji}>🍽️</Text>
@@ -33,15 +41,15 @@ export const RestaurantCard: React.FC<Props> = ({ data, onPress }) => {
           {data.name}
         </Text>
         <Text style={styles.ratingRow}>
-          ⭐ {data.rating?.toFixed(1) || '0.0'} ({data.userRatingsTotal || 0})
+          ⭐ {data.rating?.toFixed(1) || '0.0'} ({data.userRatingCount || 0})
         </Text>
         <Text style={styles.detailsRow}>
-          {priceDisplay} · {distanceDisplay}
+          {priceDisplay} {distanceDisplay ? `· ${distanceDisplay}` : ''}
         </Text>
         <View style={styles.footerRow}>
-          <Text style={styles.cuisine}>{data.cuisineType}</Text>
-          <Text style={[styles.status, { color: data.isOpen ? Colors.success : Colors.error }]}>
-            {data.isOpen ? 'Aberto' : 'Fechado'}
+          <Text style={styles.cuisine}>{cuisineText}</Text>
+          <Text style={[styles.status, { color: data.openNow ? Colors.success : Colors.error }]}>
+            {data.openNow ? 'Aberto' : 'Fechado'}
           </Text>
         </View>
       </View>

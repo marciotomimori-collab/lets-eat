@@ -96,12 +96,12 @@ const styles = StyleSheet.create({
   },
   emoji: {
     fontSize: 64,
-    marginBottom: Spacing.m,
+    marginBottom: Spacing.md,
   },
   title: {
     ...Typography.h1,
     color: Colors.surface,
-    marginBottom: Spacing.s,
+    marginBottom: Spacing.sm,
     fontWeight: 'bold',
   },
   tagline: {
@@ -111,12 +111,12 @@ const styles = StyleSheet.create({
   },
   bottomArea: {
     flex: 0.5,
-    padding: Spacing.l,
+    padding: Spacing.lg,
     justifyContent: 'center',
     backgroundColor: Colors.background,
   },
   button: {
-    marginBottom: Spacing.m,
+    marginBottom: Spacing.md,
   },
   footerText: {
     ...Typography.caption,

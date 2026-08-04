@@ -3,11 +3,12 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
-// Assuming useAchievements would be imported from a hook like this
-// import { useAchievements } from '../../hooks/useAchievements';
+import { Typography, Spacing, BorderRadius } from '../../constants/theme';
+import { useAchievements } from '../../hooks/useAchievements';
 
 export default function AchievementsScreen() {
   const { t } = useTranslation();
+  const { achievements, progress } = useAchievements();
   
   const renderCard = (title, icon, status, progress = '') => {
     const isLocked = status === 'locked';
@@ -58,15 +59,15 @@ export default function AchievementsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingTop: 60, paddingHorizontal: 16 },
-  header: { fontSize: 28, fontFamily: 'Inter-Bold', marginBottom: 24, color: '#333' },
-  sectionTitle: { fontSize: 18, fontFamily: 'Inter-SemiBold', color: '#555', marginBottom: 12, marginTop: 16 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  card: { width: '31%', aspectRatio: 0.85, backgroundColor: '#f9f9f9', borderRadius: 12, padding: 8, alignItems: 'center', justifyContent: 'center', elevation: 1 },
-  cardLocked: { backgroundColor: '#eee', opacity: 0.6 },
-  emoji: { fontSize: 32, marginBottom: 8 },
-  checkIcon: { position: 'absolute', top: 4, right: 4, backgroundColor: '#fff', borderRadius: 12 },
-  cardTitle: { fontSize: 12, textAlign: 'center', fontFamily: 'Inter-SemiBold', marginTop: 4, color: '#333' },
-  lockedText: { color: '#999' },
-  progressText: { fontSize: 12, color: Colors?.primary || '#E53935', fontFamily: 'Inter-Bold', marginTop: 4 }
+  container: { flex: 1, backgroundColor: Colors.background, paddingTop: 60, paddingHorizontal: Spacing.lg },
+  header: { ...Typography.h1, marginBottom: Spacing.xxl, color: Colors.text },
+  sectionTitle: { ...Typography.h3, color: Colors.textSecondary, marginBottom: Spacing.md, marginTop: Spacing.lg },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md },
+  card: { width: '31%', aspectRatio: 0.85, backgroundColor: Colors.surface, borderRadius: BorderRadius.md, padding: Spacing.sm, alignItems: 'center', justifyContent: 'center', elevation: 1 },
+  cardLocked: { backgroundColor: Colors.lightGray, opacity: 0.6 },
+  emoji: { fontSize: 32, marginBottom: Spacing.sm },
+  checkIcon: { position: 'absolute', top: 4, right: 4, backgroundColor: Colors.surface, borderRadius: BorderRadius.md },
+  cardTitle: { ...Typography.caption, textAlign: 'center', fontFamily: Typography.fontFamily.semiBold, marginTop: 4, color: Colors.text },
+  lockedText: { color: Colors.textSecondary },
+  progressText: { ...Typography.caption, color: Colors.primary, fontFamily: Typography.fontFamily.bold, marginTop: 4 }
 });

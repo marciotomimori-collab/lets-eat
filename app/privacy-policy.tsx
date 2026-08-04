@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
+import { Typography, Spacing } from '../constants/theme';
 
 export default function PrivacyPolicyScreen() {
   const { t } = useTranslation();
@@ -46,11 +47,11 @@ export default function PrivacyPolicyScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 16, paddingTop: 60, borderBottomWidth: 1, borderBottomColor: '#eee', backgroundColor: '#fff' },
-  backBtn: { marginRight: 16 },
-  headerTitle: { fontSize: 18, fontFamily: 'Inter-Bold', color: '#333' },
-  content: { padding: 24 },
-  sectionTitle: { fontSize: 18, fontFamily: 'Inter-Bold', color: Colors?.primary || '#E53935', marginTop: 24, marginBottom: 12 },
-  paragraph: { fontSize: 15, color: '#444', lineHeight: 24, fontFamily: 'Inter-Regular' }
+  container: { flex: 1, backgroundColor: Colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', padding: Spacing.lg, paddingTop: 60, borderBottomWidth: 1, borderBottomColor: Colors.divider, backgroundColor: Colors.surface },
+  backBtn: { marginRight: Spacing.lg },
+  headerTitle: { ...Typography.h3, color: Colors.text },
+  content: { padding: Spacing.xxl },
+  sectionTitle: { ...Typography.h3, color: Colors.primary, marginTop: Spacing.xxl, marginBottom: Spacing.md },
+  paragraph: { ...Typography.body1, color: Colors.text, lineHeight: 24 }
 });

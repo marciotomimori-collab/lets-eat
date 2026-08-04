@@ -15,7 +15,7 @@ import { Spacing, Typography } from '../../constants/theme';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { useTranslation } from 'react-i18next';
-import { registerWithEmail } from '../../services/firebase/auth';
+import { signUpWithEmail } from '../../services/firebase/auth';
 import { createUserProfile } from '../../services/firebase/firestore';
 
 export default function RegisterScreen() {
@@ -43,7 +43,7 @@ export default function RegisterScreen() {
     
     try {
       setIsLoading(true);
-      const user = await registerWithEmail(email, password);
+      const user = await signUpWithEmail(email, password);
       if (user) {
         await createUserProfile(user.uid, { email });
         router.replace('/(auth)/onboarding');
@@ -129,12 +129,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: Spacing.l,
+    padding: Spacing.lg,
     flexGrow: 1,
   },
   backButton: {
     marginTop: Spacing.xl,
-    marginBottom: Spacing.l,
+    marginBottom: Spacing.lg,
   },
   backText: {
     ...Typography.body,
@@ -146,12 +146,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   form: {
-    gap: Spacing.m,
+    gap: Spacing.md,
   },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: Spacing.s,
+    marginTop: Spacing.sm,
   },
   checkbox: {
     width: 24,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.border,
     borderRadius: 4,
-    marginRight: Spacing.s,
+    marginRight: Spacing.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -183,6 +183,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   submitButton: {
-    marginTop: Spacing.l,
+    marginTop: Spacing.lg,
   },
 });

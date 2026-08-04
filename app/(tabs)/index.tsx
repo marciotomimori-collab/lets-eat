@@ -6,6 +6,8 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Typography, Shadows } from '../../constants/theme';
 import { RestaurantCard } from '../../components/home/RestaurantCard';
 import { RestaurantCardData } from '../../types/restaurant';
+import { useAuthStore } from '../../stores/authStore';
+import { useUserStore } from '../../stores/userStore';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -13,8 +15,9 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
-  // Mock user and recent visits
-  const userName = 'João';
+  const { user } = useAuthStore();
+  const { profile } = useUserStore();
+  const userName = profile?.name || user?.email?.split('@')[0] || 'Visitante';
   const recentVisits: RestaurantCardData[] = []; // Empty state for now
 
   const handlePressIn = () => {
@@ -39,7 +42,7 @@ export default function HomeScreen() {
 
   const navigateToSearch = () => {
     setModalVisible(false);
-    router.push('/search'); // Or appropriate route
+    router.push('/search-results');
   };
 
   const navigateToSurprise = () => {
@@ -81,7 +84,7 @@ export default function HomeScreen() {
           {recentVisits.length > 0 ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
               {recentVisits.map((visit) => (
-                <View style={styles.cardWrapper} key={visit.id}>
+                <View style={styles.cardWrapper} key={visit.placeId}>
                   <RestaurantCard
                     data={visit}
                     onPress={(id) => router.push(`/restaurant/${id}`)}

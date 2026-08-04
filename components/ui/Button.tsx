@@ -13,7 +13,7 @@ import {
 import Colors from '../../constants/colors';
 import { BorderRadius, Spacing, Typography } from '../../constants/theme';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'google';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'google' | 'outline';
 
 export interface ButtonProps {
   title: string;
@@ -56,6 +56,7 @@ export default function Button({
 
   const getContainerStyle = () => {
     switch (variant) {
+      case 'outline':
       case 'secondary':
         return styles.secondaryContainer;
       case 'ghost':
@@ -70,6 +71,7 @@ export default function Button({
 
   const getTextStyle = () => {
     switch (variant) {
+      case 'outline':
       case 'secondary':
         return styles.secondaryText;
       case 'ghost':
@@ -139,7 +141,7 @@ const styles = StyleSheet.create({
     marginRight: Spacing.sm,
   },
   text: {
-    fontFamily: Typography.fonts.semiBold,
+    fontFamily: Typography.fontFamily.semiBold,
     fontSize: Typography.sizes.md,
   },
   primaryContainer: {

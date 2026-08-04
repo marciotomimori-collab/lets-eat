@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, PanResponder } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Colors } from '../../constants/colors';
+import Colors from '../../constants/colors';
 import { Typography, Spacing, Shadows } from '../../constants/theme';
 
 interface Props {

@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   message: {
     marginTop: Spacing.md,
-    fontFamily: Typography.fonts.medium,
+    fontFamily: Typography.fontFamily.medium,
     fontSize: Typography.sizes.md,
     color: '#374151',
     textAlign: 'center',
