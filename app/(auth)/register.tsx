@@ -43,9 +43,9 @@ export default function RegisterScreen() {
     
     try {
       setIsLoading(true);
-      const user = await signUpWithEmail(email, password);
-      if (user) {
-        await createUserProfile(user.uid, { email });
+      const result = await signUpWithEmail(email, password);
+      if (result && result.user) {
+        await createUserProfile(result.user.uid, { email });
         router.replace('/(auth)/onboarding');
       }
     } catch (error: any) {

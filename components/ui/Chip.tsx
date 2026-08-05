@@ -9,14 +9,17 @@ import {
 import Colors from '../../constants/colors';
 import { BorderRadius, Spacing, Typography } from '../../constants/theme';
 
+import { StyleProp, ViewStyle } from 'react-native';
+
 export interface ChipProps {
   label: string;
   emoji?: string;
   selected?: boolean;
   onPress: () => void;
+  style?: StyleProp<ViewStyle>;
 }
 
-export default function Chip({ label, emoji, selected = false, onPress }: ChipProps) {
+export default function Chip({ label, emoji, selected = false, onPress, style }: ChipProps) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -34,7 +37,7 @@ export default function Chip({ label, emoji, selected = false, onPress }: ChipPr
   };
 
   return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+    <Animated.View style={[{ transform: [{ scale: scaleAnim }] }, style]}>
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={onPress}

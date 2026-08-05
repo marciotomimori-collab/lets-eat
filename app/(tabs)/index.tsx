@@ -17,7 +17,7 @@ export default function HomeScreen() {
 
   const { user } = useAuthStore();
   const { profile } = useUserStore();
-  const userName = profile?.name || user?.email?.split('@')[0] || 'Visitante';
+  const userName = profile?.displayName || user?.email?.split('@')[0] || 'Visitante';
   const recentVisits: RestaurantCardData[] = []; // Empty state for now
 
   const handlePressIn = () => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Slider } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Colors from '../../constants/colors';
+import { Colors } from '../../constants/colors';
 import { Spacing, Typography } from '../../constants/theme';
 import { CUISINE_TYPES } from '../../constants/cuisineTypes';
 import { EVENT_TYPES, PRICE_LEVELS } from '../../constants/eventTypes';
@@ -19,6 +19,8 @@ interface Props {
   onSubmit: (filters: SearchFilters) => void;
 }
 
+const RADIUS_OPTIONS = [1, 3, 5, 10, 15];
+
 export const SearchForm: React.FC<Props> = ({ onSubmit }) => {
   const { t } = useTranslation();
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
@@ -26,15 +28,15 @@ export const SearchForm: React.FC<Props> = ({ onSubmit }) => {
   const [selectedPriceLevels, setSelectedPriceLevels] = useState<string[]>([]);
   const [radius, setRadius] = useState<number>(5);
 
-  const toggleCuisine = (id: string) => {
+  const toggleCuisine = (key: string) => {
     setSelectedCuisines((prev) =>
-      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+      prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]
     );
   };
 
-  const togglePrice = (level: string) => {
+  const togglePrice = (key: string) => {
     setSelectedPriceLevels((prev) =>
-      prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level]
+      prev.includes(key) ? prev.filter((l) => l !== key) : [...prev, key]
     );
   };
 
@@ -53,10 +55,10 @@ export const SearchForm: React.FC<Props> = ({ onSubmit }) => {
       <View style={styles.chipContainer}>
         {CUISINE_TYPES.map((cuisine) => (
           <Chip
-            key={cuisine.id}
-            label={t(`cuisines.${cuisine.id}`, cuisine.label)}
-            selected={selectedCuisines.includes(cuisine.id)}
-            onPress={() => toggleCuisine(cuisine.id)}
+            key={cuisine.key}
+            label={t(`cuisines.${cuisine.key}`, cuisine.labelPt)}
+            selected={selectedCuisines.includes(cuisine.key)}
+            onPress={() => toggleCuisine(cuisine.key)}
           />
         ))}
       </View>
@@ -65,10 +67,10 @@ export const SearchForm: React.FC<Props> = ({ onSubmit }) => {
       <View style={styles.chipContainer}>
         {EVENT_TYPES.map((event) => (
           <Chip
-            key={event.id}
-            label={t(`events.${event.id}`, event.label)}
-            selected={selectedEventType === event.id}
-            onPress={() => setSelectedEventType(event.id === selectedEventType ? null : event.id)}
+            key={event.key}
+            label={t(`events.${event.key}`, event.labelPt)}
+            selected={selectedEventType === event.key}
+            onPress={() => setSelectedEventType(event.key === selectedEventType ? null : event.key)}
           />
         ))}
       </View>
@@ -77,10 +79,10 @@ export const SearchForm: React.FC<Props> = ({ onSubmit }) => {
       <View style={styles.chipContainer}>
         {PRICE_LEVELS.map((price) => (
           <Chip
-            key={price.id}
+            key={price.key}
             label={price.label}
-            selected={selectedPriceLevels.includes(price.id)}
-            onPress={() => togglePrice(price.id)}
+            selected={selectedPriceLevels.includes(price.key)}
+            onPress={() => togglePrice(price.key)}
           />
         ))}
       </View>
@@ -89,17 +91,16 @@ export const SearchForm: React.FC<Props> = ({ onSubmit }) => {
         {t('search.distance', 'Distância')}: {radius} km
       </Text>
       <View style={styles.radiusControls}>
-        <Slider
-          style={{ width: '100%', height: 40 }}
-          minimumValue={1}
-          maximumValue={15}
-          step={1}
-          value={radius}
-          onValueChange={setRadius}
-          minimumTrackTintColor={Colors.primary}
-          maximumTrackTintColor={Colors.lightGray}
-          thumbTintColor={Colors.primary}
-        />
+        <View style={styles.chipContainer}>
+          {RADIUS_OPTIONS.map((opt) => (
+            <Chip
+              key={opt.toString()}
+              label={`${opt} km`}
+              selected={radius === opt}
+              onPress={() => setRadius(opt)}
+            />
+          ))}
+        </View>
       </View>
 
       <View style={styles.footer}>

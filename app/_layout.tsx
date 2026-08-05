@@ -5,10 +5,14 @@ import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_7
 import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import '../i18n';
+import { useAuth } from '../hooks/useAuth';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  // Initialize Firebase Auth state listener globally
+  useAuth();
+
   const [fontsLoaded, fontError] = useFonts({
     'Inter_400Regular': Inter_400Regular,
     'Inter_500Medium': Inter_500Medium,

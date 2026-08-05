@@ -10,22 +10,31 @@ import { useGooglePlaces } from '../hooks/useGooglePlaces';
 import { useSearchStore } from '../stores/searchStore';
 import { RestaurantCardData } from '../types/restaurant';
 import { RestaurantCard } from '../components/home/RestaurantCard';
+import { useLocation } from '../hooks/useLocation';
 
 export default function SearchResultsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { searchByText, isLoading, error } = useGooglePlaces();
-  const { searchQuery, filters } = useSearchStore();
+  const { searchNearby, isLoading: isSearching, error } = useGooglePlaces();
+  const { selectedCuisines, selectedEventType, searchRadius } = useSearchStore();
+  const { latitude, longitude, isLoading: isLocationLoading } = useLocation();
   const [results, setResults] = useState<RestaurantCardData[]>([]);
 
+  const isLoading = isSearching || isLocationLoading;
+
   useEffect(() => {
-    if (searchQuery) {
-      searchByText({ textQuery: searchQuery, ...filters }).then(data => {
+    if (latitude && longitude) {
+      searchNearby({
+        latitude,
+        longitude,
+        radius: (searchRadius || 5) * 1000,
+        // Optional mapping based on included types can be added here
+      }).then(data => {
         setResults(data);
       });
     }
-  }, [searchQuery, filters]);
+  }, [latitude, longitude, selectedCuisines, selectedEventType, searchRadius]);
 
   return (
     <View style={styles.container}>

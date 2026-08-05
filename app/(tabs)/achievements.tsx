@@ -8,13 +8,13 @@ import { useAchievements } from '../../hooks/useAchievements';
 
 export default function AchievementsScreen() {
   const { t } = useTranslation();
-  const { achievements, progress } = useAchievements();
+  const { achievements, isLoaded } = useAchievements();
   
-  const renderCard = (title, icon, status, progress = '') => {
+  const renderCard = (key: string, title: string, icon: string, status: 'locked' | 'unlocked' | 'progress', progressText: string = '') => {
     const isLocked = status === 'locked';
     const inProgress = status === 'progress';
     return (
-      <View style={[styles.card, isLocked && styles.cardLocked]} key={title}>
+      <View style={[styles.card, isLocked && styles.cardLocked]} key={key}>
         {isLocked ? (
           <Ionicons name="lock-closed" size={32} color="#999" />
         ) : (
@@ -23,7 +23,7 @@ export default function AchievementsScreen() {
         {status === 'unlocked' && (
           <Ionicons name="checkmark-circle" size={24} color="#4CAF50" style={styles.checkIcon} />
         )}
-        {inProgress && <Text style={styles.progressText}>{progress}</Text>}
+        {inProgress && <Text style={styles.progressText}>{progressText}</Text>}
         <Text style={[styles.cardTitle, isLocked && styles.lockedText]} numberOfLines={2}>
           {isLocked ? '???' : title}
         </Text>
@@ -31,28 +31,41 @@ export default function AchievementsScreen() {
     );
   };
 
+  const unlocked = achievements?.filter(a => a.isUnlocked) || [];
+  const inProgress = achievements?.filter(a => !a.isUnlocked && a.progress > 0) || [];
+  const locked = achievements?.filter(a => !a.isUnlocked && a.progress === 0) || [];
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>🏆 {t('achievements.title', 'Conquistas')}</Text>
       
-      <Text style={styles.sectionTitle}>{t('achievements.unlocked', 'Desbloqueadas')}</Text>
-      <View style={styles.grid}>
-        {renderCard('Primeira Mordida', '🍔', 'unlocked')}
-        {renderCard('Crítico Feroz', '✍️', 'unlocked')}
-      </View>
+      {unlocked.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>{t('achievements.unlocked', 'Desbloqueadas')}</Text>
+          <View style={styles.grid}>
+            {unlocked.map((ach) => renderCard(ach.key, ach.title, ach.emoji, 'unlocked'))}
+          </View>
+        </>
+      )}
 
-      <Text style={styles.sectionTitle}>{t('achievements.inProgress', 'Em progresso')}</Text>
-      <View style={styles.grid}>
-        {renderCard('Explorador', '🗺️', 'progress', '2/5')}
-        {renderCard('Rei da Pizza', '🍕', 'progress', '1/3')}
-      </View>
+      {inProgress.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>{t('achievements.inProgress', 'Em progresso')}</Text>
+          <View style={styles.grid}>
+            {inProgress.map((ach) => renderCard(ach.key, ach.title, ach.emoji, 'progress', `${ach.progress}/${ach.target}`))}
+          </View>
+        </>
+      )}
 
-      <Text style={styles.sectionTitle}>{t('achievements.locked', 'Bloqueadas')}</Text>
-      <View style={styles.grid}>
-        {renderCard('lock1', '', 'locked')}
-        {renderCard('lock2', '', 'locked')}
-        {renderCard('lock3', '', 'locked')}
-      </View>
+      {locked.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>{t('achievements.locked', 'Bloqueadas')}</Text>
+          <View style={styles.grid}>
+            {locked.map((ach) => renderCard(ach.key, ach.title, ach.emoji, 'locked'))}
+          </View>
+        </>
+      )}
+
       <View style={{height: 40}} />
     </ScrollView>
   );

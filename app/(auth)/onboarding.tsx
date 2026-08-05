@@ -14,17 +14,17 @@ import { useAuthStore } from '../../stores/authStore';
 
 export default function OnboardingScreen() {
   const { t } = useTranslation();
-  const [name, setName] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [age, setAge] = useState('');
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const user = useAuthStore((state) => state.user);
 
-  const toggleCuisine = (cuisineId: string) => {
+  const toggleCuisine = (cuisineKey: string) => {
     setSelectedCuisines((prev) =>
-      prev.includes(cuisineId)
-        ? prev.filter((id) => id !== cuisineId)
-        : [...prev, cuisineId]
+      prev.includes(cuisineKey)
+        ? prev.filter((id) => id !== cuisineKey)
+        : [...prev, cuisineKey]
     );
   };
 
@@ -33,10 +33,9 @@ export default function OnboardingScreen() {
       setIsLoading(true);
       if (user?.uid) {
         await updateUserProfile(user.uid, {
-          name,
-          age: parseInt(age, 10) || null,
-          preferences: selectedCuisines,
-          onboardingComplete: true,
+          displayName,
+          age: parseInt(age, 10) || undefined,
+          foodPreferences: selectedCuisines,
         });
       }
       router.replace('/(tabs)' as any);
@@ -58,8 +57,8 @@ export default function OnboardingScreen() {
       <Input
         label={t('onboarding.name', 'Nome')}
         placeholder="Como quer ser chamado?"
-        value={name}
-        onChangeText={setName}
+        value={displayName}
+        onChangeText={setDisplayName}
       />
 
       <View style={styles.spacer} />
@@ -79,10 +78,10 @@ export default function OnboardingScreen() {
       <View style={styles.chipGrid}>
         {CUISINE_TYPES.map((cuisine) => (
           <Chip
-            key={cuisine.id}
-            label={cuisine.name}
-            selected={selectedCuisines.includes(cuisine.id)}
-            onPress={() => toggleCuisine(cuisine.id)}
+            key={cuisine.key}
+            label={cuisine.labelPt}
+            selected={selectedCuisines.includes(cuisine.key)}
+            onPress={() => toggleCuisine(cuisine.key)}
             style={styles.chip}
           />
         ))}

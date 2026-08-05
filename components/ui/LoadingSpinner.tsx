@@ -35,7 +35,7 @@ export default function LoadingSpinner({ fullScreen = false, message }: LoadingS
 
 const styles = StyleSheet.create({
   fullScreenContainer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',

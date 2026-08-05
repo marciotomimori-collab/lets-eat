@@ -8,6 +8,13 @@ import { Typography, Spacing, BorderRadius } from '../../constants/theme';
 import { useAuthStore } from '../../stores/authStore';
 import { useUserStore } from '../../stores/userStore';
 
+interface SectionRowProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  onPress?: () => void;
+  color?: string;
+}
+
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -39,13 +46,13 @@ export default function SettingsScreen() {
     );
   };
 
-  const SectionRow = ({ icon, title, onPress, color = '#333' }) => (
-    <TouchableOpacity style={styles.row} onPress={onPress}>
+  const SectionRow: React.FC<SectionRowProps> = ({ icon, title, onPress, color = '#333' }) => (
+    <TouchableOpacity style={styles.row} onPress={onPress} disabled={!onPress}>
       <View style={styles.rowLeft}>
         <Ionicons name={icon} size={22} color={color} style={styles.rowIcon} />
         <Text style={[styles.rowTitle, { color }]}>{title}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#ccc" />
+      {onPress && <Ionicons name="chevron-forward" size={20} color="#ccc" />}
     </TouchableOpacity>
   );
 
@@ -54,10 +61,10 @@ export default function SettingsScreen() {
       <Text style={styles.header}>{t('settings.title', 'Configurações')}</Text>
       
       <View style={styles.profileCard}>
-        <View style={styles.avatar}><Text style={styles.avatarText}>{profile?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}</Text></View>
+        <View style={styles.avatar}><Text style={styles.avatarText}>{profile?.displayName?.charAt(0) || user?.email?.charAt(0) || 'U'}</Text></View>
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>{profile?.name || 'Usuário Teste'}</Text>
-          <Text style={styles.profileEmail}>{user?.email || 'usuario@letseat.com'}</Text>
+          <Text style={styles.profileName}>{profile?.displayName || 'Usuário'}</Text>
+          <Text style={styles.profileEmail}>{user?.email || ''}</Text>
         </View>
         <TouchableOpacity><Text style={styles.editBtn}>{t('settings.edit', 'Editar')}</Text></TouchableOpacity>
       </View>

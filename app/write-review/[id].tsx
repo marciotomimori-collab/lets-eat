@@ -9,7 +9,7 @@ import { createReview } from '../../services/firebase/firestore';
 import { useAuthStore } from '../../stores/authStore';
 
 export default function WriteReviewScreen() {
-  const { id } = useLocalSearchParams();
+  const { id, placeName: paramPlaceName } = useLocalSearchParams();
   const { t } = useTranslation();
   const router = useRouter();
   const [rating, setRating] = useState(0);
@@ -17,12 +17,15 @@ export default function WriteReviewScreen() {
   const [submitting, setSubmitting] = useState(false);
   const { user } = useAuthStore();
 
+  const placeName = (paramPlaceName as string) || 'Restaurante';
+
   const handleSubmit = async () => {
     if (rating === 0 || !user?.uid) return;
     setSubmitting(true);
     try {
       await createReview(user.uid, user.email?.split('@')[0] || 'User', {
         placeId: id as string,
+        placeName: placeName,
         rating,
         comment,
       });
@@ -44,7 +47,7 @@ export default function WriteReviewScreen() {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.restaurantName}>La Bella Pasta</Text>
+        <Text style={styles.restaurantName}>{placeName}</Text>
         
         <View style={styles.starsContainer}>
           {[1, 2, 3, 4, 5].map((star) => (

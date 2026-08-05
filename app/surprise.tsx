@@ -8,21 +8,34 @@ import { Typography, Spacing, BorderRadius } from '../constants/theme';
 import { useGooglePlaces } from '../hooks/useGooglePlaces';
 import { RestaurantCardData } from '../types/restaurant';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { useLocation } from '../hooks/useLocation';
 
 export default function SurpriseScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [revealed, setRevealed] = useState(false);
   const slideAnim = useState(new Animated.Value(100))[0];
-  const { searchNearby, isLoading } = useGooglePlaces();
+  const { searchNearby, isLoading: isSearching } = useGooglePlaces();
+  const { latitude, longitude, isLoading: isLocationLoading, error: locationError } = useLocation();
   const [result, setResult] = useState<RestaurantCardData | null>(null);
 
+  const isLoading = isSearching || isLocationLoading;
+
   const handleReveal = async () => {
-    // arbitrary lat lng for testing
-    const places = await searchNearby({ locationRestriction: { circle: { center: { latitude: -23.5505, longitude: -46.6333 }, radius: 5000.0 } } });
+    if (!latitude || !longitude) return;
+
+    const places = await searchNearby({
+      latitude,
+      longitude,
+      radius: 5000,
+    });
+
     if (places.length > 0) {
       setResult(places[Math.floor(Math.random() * places.length)]);
+    } else {
+      setResult(null);
     }
+
     setRevealed(true);
     Animated.spring(slideAnim, {
       toValue: 0,
@@ -48,7 +61,7 @@ export default function SurpriseScreen() {
       
       <View style={styles.center}>
         {!revealed ? (
-          <TouchableOpacity style={styles.surpriseBtn} onPress={handleReveal} activeOpacity={0.8} disabled={isLoading}>
+          <TouchableOpacity style={styles.surpriseBtn} onPress={handleReveal} activeOpacity={0.8} disabled={isLoading || !!locationError}>
             {isLoading ? <LoadingSpinner /> : (
               <>
                 <Ionicons name="restaurant" size={64} color={Colors.surface} />

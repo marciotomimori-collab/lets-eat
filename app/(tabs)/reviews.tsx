@@ -9,12 +9,11 @@ import { getReviewsByUser } from '../../services/firebase/firestore';
 import { useAuthStore } from '../../stores/authStore';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
-const RestaurantCard = ({ item, onPress }) => (
+const RestaurantCard = ({ item, onPress }: { item: any, onPress: () => void }) => (
   <TouchableOpacity style={styles.card} onPress={onPress}>
-    <Text style={styles.cardTitle}>{item.name}</Text>
-    <Text style={styles.ratingText}>⭐ {item.googleRating} Google | ⭐ {item.appRating} App</Text>
-    <Text style={styles.detailsText}>{item.reviewCount} avaliações no app</Text>
-    <Text style={styles.detailsText}>{item.priceLevel} • {item.cuisine}</Text>
+    <Text style={styles.cardTitle}>{item.placeName}</Text>
+    <Text style={styles.ratingText}>⭐ {item.rating} Avaliação</Text>
+    <Text style={styles.detailsText}>{item.comment}</Text>
   </TouchableOpacity>
 );
 
@@ -60,11 +59,11 @@ export default function ReviewsScreen() {
       
       <FlatList 
         data={reviews}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item: any) => item.id}
         renderItem={({item}) => (
           <RestaurantCard 
             item={item} 
-            onPress={() => router.push(`/restaurant/${item.id}`)} 
+            onPress={() => router.push(`/restaurant/${item.placeId}`)} 
           />
         )}
         ListEmptyComponent={() => (
