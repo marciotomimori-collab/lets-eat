@@ -1,111 +1,177 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Linking, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
-import { Typography, Spacing, BorderRadius } from '../../constants/theme';
+import { Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import { useGooglePlaces } from '../../hooks/useGooglePlaces';
-import { getReviewsForPlace } from '../../services/firebase/firestore';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import StarRating from '../../components/ui/StarRating';
+import Button from '../../components/ui/Button';
+import { formatPriceLevel } from '../../utils/formatters';
 
 export default function RestaurantDetailScreen() {
-  const { id } = useLocalSearchParams();
-  const { t } = useTranslation();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const { getDetails, isLoading } = useGooglePlaces();
-  const [place, setPlace] = React.useState<any>(null);
-  const [reviews, setReviews] = React.useState<any[]>([]);
+  const [restaurant, setRestaurant] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'sobre' | 'avaliacoes' | 'fotos'>('sobre');
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (id) {
-      getDetails(id as string).then(setPlace);
-      getReviewsForPlace(id as string).then(setReviews);
+      getDetails(id).then(setRestaurant).catch(console.error);
     }
-  }, [id]);
+  }, [id, getDetails]);
 
-  const openMaps = () => {
-    if (place?.location) {
-      Linking.openURL(`https://maps.google.com/?q=${place.location.latitude},${place.location.longitude}`);
+  if (isLoading || !restaurant) {
+    return <LoadingSpinner fullScreen />;
+  }
+
+  const handleOpenMap = () => {
+    const lat = restaurant.location?.latitude;
+    const lng = restaurant.location?.longitude;
+    const url = Platform.select({
+      ios: `maps:0,0?q=${restaurant.displayName?.text}@${lat},${lng}`,
+      android: `geo:0,0?q=${lat},${lng}(${restaurant.displayName?.text})`
+    });
+    if (url) {
+      Linking.canOpenURL(url).then(supported => {
+        if (supported) Linking.openURL(url);
+      });
     }
   };
-  
-  const callPhone = () => {
-    if (place?.nationalPhoneNumber) {
-      Linking.openURL(`tel:${place.nationalPhoneNumber}`);
+
+  const handleCall = () => {
+    if (restaurant.nationalPhoneNumber) {
+      Linking.openURL(`tel:${restaurant.nationalPhoneNumber}`);
     }
   };
 
-  if (isLoading || !place) return <LoadingSpinner fullScreen />;
+  const priceStr = restaurant.priceLevel ? formatPriceLevel(restaurant.priceLevel) : '';
 
   return (
     <View style={styles.container}>
-      <ScrollView>
-        <View style={styles.imagePlaceholder}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.heroContainer}>
+          <View style={styles.heroPlaceholder}>
+            <Text style={{ fontSize: 64 }}>🍽️</Text>
+          </View>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color={Colors.white} />
           </TouchableOpacity>
-          <Ionicons name="image-outline" size={64} color="#ccc" />
         </View>
-        
-        <View style={styles.content}>
-          <Text style={styles.title}>{place.displayName?.text}</Text>
-          
-          <View style={styles.ratingRow}>
-            <View style={styles.badge}><Text style={styles.badgeText}>⭐ {place.rating} Google</Text></View>
-            <View style={[styles.badge, styles.badgeApp]}><Text style={[styles.badgeText, {color: Colors.surface}]}>⭐ Let's Eat</Text></View>
+
+        <View style={styles.contentCard}>
+          <Text style={styles.title}>{restaurant.displayName?.text}</Text>
+          <View style={styles.statsRow}>
+            <Ionicons name="star" size={16} color={Colors.star} />
+            <Text style={styles.statsText}> {restaurant.rating} ({restaurant.userRatingCount})</Text>
+            {restaurant.types?.[0] && <Text style={styles.statsText}> • {restaurant.types[0].replace(/_/g, ' ')}</Text>}
+            {priceStr ? <Text style={styles.statsText}> • {priceStr}</Text> : null}
           </View>
 
-          <Text style={styles.subtitle}>{place.priceLevel} • {place.types?.[0]}</Text>
-          
-          <View style={styles.infoRow}>
-            <Ionicons name="location" size={20} color={Colors.primary} />
-            <Text style={styles.infoText}>{place.formattedAddress}</Text>
-          </View>
-          
-          <TouchableOpacity style={styles.infoRow} onPress={callPhone}>
-            <Ionicons name="call" size={20} color={Colors.primary} />
-            <Text style={[styles.infoText, { color: Colors.primary }]}>{place.nationalPhoneNumber || 'N/A'}</Text>
-          </TouchableOpacity>
-
-          <View style={styles.infoRow}>
-            <Ionicons name="time" size={20} color={Colors.primary} />
-            <Text style={styles.infoText}>{place.currentOpeningHours?.openNow ? 'Aberto agora' : 'Fechado'}</Text>
-          </View>
-
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.actionBtn} onPress={openMaps}>
-              <Ionicons name="map" size={20} color={Colors.surface} />
-              <Text style={styles.actionBtnText}>{t('restaurant.map', 'Ver no mapa')}</Text>
+          <View style={styles.tabsRow}>
+            <TouchableOpacity onPress={() => setActiveTab('sobre')} style={[styles.tab, activeTab === 'sobre' && styles.activeTab]}>
+              <Text style={[styles.tabText, activeTab === 'sobre' && styles.activeTabText]}>{t('restaurant.about', 'Sobre')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionBtn, styles.actionBtnOutline]} onPress={callPhone}>
-              <Ionicons name="call" size={20} color={Colors.primary} />
-              <Text style={[styles.actionBtnText, {color: Colors.primary}]}>{t('restaurant.call', 'Ligar')}</Text>
+            <TouchableOpacity onPress={() => setActiveTab('avaliacoes')} style={[styles.tab, activeTab === 'avaliacoes' && styles.activeTab]}>
+              <Text style={[styles.tabText, activeTab === 'avaliacoes' && styles.activeTabText]}>{t('restaurant.reviews', 'Avaliações')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setActiveTab('fotos')} style={[styles.tab, activeTab === 'fotos' && styles.activeTab]}>
+              <Text style={[styles.tabText, activeTab === 'fotos' && styles.activeTabText]}>{t('restaurant.photos', 'Fotos')}</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.divider} />
-
-          <Text style={styles.sectionTitle}>{t('restaurant.communityReviews', 'Avaliações da Comunidade')}</Text>
-          {reviews.length === 0 ? (
-            <Text style={styles.emptyReviews}>{t('restaurant.noReviews', 'Seja o primeiro a avaliar!')}</Text>
-          ) : (
-            reviews.map((r, i) => (
-              <View key={i} style={{ marginBottom: Spacing.md }}>
-                <Text style={{ ...Typography.body1 }}>⭐ {r.rating} - {r.userDisplayName}</Text>
-                <Text style={{ ...Typography.body2, color: Colors.textSecondary }}>{r.comment}</Text>
+          {activeTab === 'sobre' && (
+            <View style={styles.tabContent}>
+              <TouchableOpacity style={styles.infoRow} onPress={handleOpenMap}>
+                <Ionicons name="location-outline" size={24} color={Colors.primary} />
+                <Text style={styles.infoText}>{restaurant.formattedAddress}</Text>
+              </TouchableOpacity>
+              
+              {restaurant.nationalPhoneNumber && (
+                <TouchableOpacity style={styles.infoRow} onPress={handleCall}>
+                  <Ionicons name="call-outline" size={24} color={Colors.primary} />
+                  <Text style={styles.infoText}>{restaurant.nationalPhoneNumber}</Text>
+                </TouchableOpacity>
+              )}
+              
+              <View style={styles.infoRow}>
+                <Ionicons name="time-outline" size={24} color={Colors.primary} />
+                <Text style={[styles.infoText, { color: restaurant.currentOpeningHours?.openNow ? Colors.success : Colors.error }]}>
+                  {restaurant.currentOpeningHours?.openNow ? t('restaurant.open', 'Aberto agora') : t('restaurant.closed', 'Fechado')}
+                </Text>
               </View>
-            ))
+            </View>
           )}
-          <View style={{height: 100}} />
+
+          {activeTab === 'avaliacoes' && (
+            <View style={styles.tabContent}>
+              <View style={styles.ratingOverview}>
+                <View style={styles.ratingNumberContainer}>
+                  <Text style={styles.ratingBigNumber}>{restaurant.rating?.toFixed(1) || '0.0'}</Text>
+                  <StarRating rating={restaurant.rating || 0} size={16} />
+                  <Text style={styles.reviewCountText}>{restaurant.userRatingCount || 0} avaliações</Text>
+                </View>
+                
+                <View style={styles.ratingBarsContainer}>
+                  {[5,4,3,2,1].map(star => (
+                    <View key={star} style={styles.ratingBarRow}>
+                      <Text style={styles.ratingBarText}>{star}</Text>
+                      <View style={styles.ratingBarBackground}>
+                        <View style={[styles.ratingBarFill, { width: `${(star / 5) * 100}%` }]} />
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              <Button 
+                title={t('restaurant.writeReviewBtn', 'Avaliar restaurante')} 
+                onPress={() => router.push(`/write-review/${id}`)}
+                style={{ marginBottom: Spacing.xl }}
+              />
+
+              <Text style={styles.sectionTitle}>{t('restaurant.userReviews', 'Comentários')}</Text>
+              
+              {restaurant.reviews?.map((r: any, idx: number) => (
+                <View key={idx} style={styles.reviewItem}>
+                  <View style={styles.reviewHeader}>
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarText}>{r.authorAttribution?.displayName?.charAt(0) || 'U'}</Text>
+                    </View>
+                    <View style={styles.reviewerInfo}>
+                      <Text style={styles.reviewerName}>{r.authorAttribution?.displayName || 'Usuário'}</Text>
+                      <Text style={styles.reviewTime}>{r.relativePublishTimeDescription}</Text>
+                    </View>
+                  </View>
+                  <View style={{ marginBottom: Spacing.xs }}>
+                    <StarRating rating={r.rating} size={14} />
+                  </View>
+                  <Text style={styles.reviewText}>{r.text?.text || r.text}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {activeTab === 'fotos' && (
+            <View style={styles.tabContent}>
+              <View style={styles.emptyState}>
+                <Ionicons name="images-outline" size={48} color={Colors.border} />
+                <Text style={styles.emptyText}>{t('restaurant.noPhotos', 'Nenhuma foto disponível.')}</Text>
+              </View>
+            </View>
+          )}
         </View>
       </ScrollView>
 
       <TouchableOpacity 
-        style={styles.fab} 
+        style={styles.fab}
         onPress={() => router.push(`/write-review/${id}`)}
       >
-        <Ionicons name="pencil" size={24} color={Colors.surface} />
+        <Ionicons name="pencil" size={24} color={Colors.white} />
       </TouchableOpacity>
     </View>
   );
@@ -113,23 +179,73 @@ export default function RestaurantDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  imagePlaceholder: { width: '100%', height: 280, backgroundColor: Colors.lightGray, justifyContent: 'center', alignItems: 'center' },
-  backButton: { position: 'absolute', top: 50, left: Spacing.lg, backgroundColor: Colors.surface, padding: Spacing.sm, borderRadius: BorderRadius.full, elevation: 4 },
-  content: { padding: Spacing.xxl, marginTop: -20, backgroundColor: Colors.surface, borderTopLeftRadius: BorderRadius.xl, borderTopRightRadius: BorderRadius.xl },
-  title: { ...Typography.h1, color: Colors.text, marginBottom: Spacing.sm },
-  ratingRow: { flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.md },
-  badge: { backgroundColor: Colors.lightGray, paddingHorizontal: Spacing.md, paddingVertical: 6, borderRadius: BorderRadius.lg },
-  badgeApp: { backgroundColor: Colors.primary },
-  badgeText: { fontFamily: Typography.fontFamily.semiBold, color: Colors.text },
-  subtitle: { ...Typography.h3, color: Colors.textSecondary, marginBottom: Spacing.xxl },
+  scrollContent: { paddingBottom: 100 },
+  heroContainer: { height: 200, width: '100%', position: 'relative' },
+  heroPlaceholder: { flex: 1, backgroundColor: Colors.primaryLight, justifyContent: 'center', alignItems: 'center' },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: Spacing.lg,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contentCard: {
+    marginTop: -24,
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: BorderRadius.xxl,
+    borderTopRightRadius: BorderRadius.xxl,
+    padding: Spacing.xl,
+    minHeight: 500,
+  },
+  title: { ...Typography.h2, color: Colors.text, marginBottom: Spacing.xs },
+  statsRow: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.lg },
+  statsText: { ...Typography.body2, color: Colors.textSecondary },
+  tabsRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: Colors.border, marginBottom: Spacing.lg },
+  tab: { flex: 1, paddingVertical: Spacing.md, alignItems: 'center' },
+  activeTab: { borderBottomWidth: 2, borderBottomColor: Colors.primary },
+  tabText: { ...Typography.body, color: Colors.textSecondary },
+  activeTabText: { fontFamily: Typography.fontFamily.semiBold, color: Colors.primary },
+  tabContent: { flex: 1 },
   infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.lg },
-  infoText: { ...Typography.body1, color: Colors.text, marginLeft: Spacing.md },
-  actionRow: { flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.xl, marginBottom: Spacing.xxl },
-  actionBtn: { flex: 1, backgroundColor: Colors.primary, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 14, borderRadius: BorderRadius.md },
-  actionBtnOutline: { backgroundColor: 'transparent', borderWidth: 2, borderColor: Colors.primary },
-  actionBtnText: { color: Colors.surface, ...Typography.body1, fontFamily: Typography.fontFamily.bold, marginLeft: Spacing.sm },
-  divider: { height: 1, backgroundColor: Colors.divider, marginVertical: Spacing.xxl },
-  sectionTitle: { ...Typography.h3, color: Colors.text, marginBottom: Spacing.lg },
-  emptyReviews: { color: Colors.textSecondary, fontStyle: 'italic', ...Typography.body2 },
-  fab: { position: 'absolute', bottom: Spacing.xxl, right: Spacing.xxl, width: 64, height: 64, borderRadius: BorderRadius.full, backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center', elevation: 8, shadowColor: Colors.primary, shadowOpacity: 0.4, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } }
+  infoText: { ...Typography.body, color: Colors.text, marginLeft: Spacing.md, flex: 1 },
+  
+  ratingOverview: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xl },
+  ratingNumberContainer: { alignItems: 'center', marginRight: Spacing.xl },
+  ratingBigNumber: { ...Typography.display, color: Colors.text },
+  reviewCountText: { ...Typography.caption, color: Colors.textSecondary, marginTop: Spacing.xs },
+  ratingBarsContainer: { flex: 1 },
+  ratingBarRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  ratingBarText: { ...Typography.caption, color: Colors.textSecondary, width: 12 },
+  ratingBarBackground: { flex: 1, height: 6, backgroundColor: Colors.lightGray, borderRadius: 3, marginLeft: Spacing.sm },
+  ratingBarFill: { height: '100%', backgroundColor: Colors.star, borderRadius: 3 },
+  
+  sectionTitle: { ...Typography.h4, color: Colors.text, marginBottom: Spacing.md },
+  reviewItem: { marginBottom: Spacing.xl },
+  reviewHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.sm },
+  avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.primaryLight, justifyContent: 'center', alignItems: 'center', marginRight: Spacing.md },
+  avatarText: { color: Colors.white, ...Typography.label },
+  reviewerInfo: { flex: 1 },
+  reviewerName: { ...Typography.label, color: Colors.text },
+  reviewTime: { ...Typography.caption, color: Colors.textSecondary },
+  reviewText: { ...Typography.body2, color: Colors.text },
+  
+  emptyState: { alignItems: 'center', marginTop: Spacing.xxl },
+  emptyText: { marginTop: Spacing.lg, color: Colors.textSecondary, ...Typography.body },
+  
+  fab: {
+    position: 'absolute',
+    bottom: Spacing.xl,
+    right: Spacing.xl,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Shadows.md,
+  }
 });

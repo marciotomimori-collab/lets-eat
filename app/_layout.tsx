@@ -37,7 +37,8 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="search-results" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="search-form" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="search-results" />
         <Stack.Screen name="surprise" options={{ presentation: 'modal' }} />
         <Stack.Screen name="restaurant/[id]" />
         <Stack.Screen name="write-review/[id]" options={{ presentation: 'modal' }} />

@@ -1,80 +1,99 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import React from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { useRouter, Link } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-
-import { Colors } from '../../constants/colors';
-import { Spacing, Typography } from '../../constants/theme';
-import Button from '../../components/ui/Button';
 import { useTranslation } from 'react-i18next';
-import { signInAnonymously } from '../../services/firebase/auth';
+import { Colors } from '../../constants/colors';
+import { Typography, Spacing, BorderRadius } from '../../constants/theme';
+import Button from '../../components/ui/Button';
+import { useAuthStore } from '../../stores/authStore';
+import { User } from 'firebase/auth';
+
+const { width, height } = Dimensions.get('window');
 
 export default function WelcomeScreen() {
+  const router = useRouter();
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
+  const { setUser } = useAuthStore();
 
-  const handleEmailPress = () => {
-    router.push('/(auth)/register');
+  const handleGuestLogin = () => {
+    const mockGuestUser = {
+      uid: 'guest-user-123',
+      isAnonymous: true,
+      email: null,
+      displayName: null,
+    } as unknown as User;
+    
+    setUser(mockGuestUser);
+    router.replace('/(auth)/onboarding');
   };
 
-  const handleGooglePress = () => {
-    // Simplified google sign in
-    console.log('Google Sign In');
-  };
-
-  const handleGuestPress = async () => {
-    try {
-      setIsLoading(true);
-      await signInAnonymously();
-      router.replace('/(auth)/onboarding');
-    } catch (error) {
-      console.error('Guest login failed', error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleGoogleLogin = () => {
+    // Mock google login
+    const mockGoogleUser = {
+      uid: 'google-user-123',
+      isAnonymous: false,
+      email: 'user@google.com',
+      displayName: 'Google User',
+    } as unknown as User;
+    
+    setUser(mockGoogleUser);
+    router.replace('/(auth)/onboarding');
   };
 
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[Colors.primary + '80', Colors.primary]} // Light red to primary gradient
-        style={styles.topArea}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
+        colors={[Colors.primary, Colors.primaryDark]}
+        style={styles.topHalf}
       >
         <View style={styles.logoContainer}>
-          <Text style={styles.emoji}>🍽️</Text>
-          <Text style={styles.title}>LET'S EAT</Text>
-          <Text style={styles.tagline}>{t('welcome.tagline', 'Descubra onde comer hoje')}</Text>
+          <Text style={styles.logoText}>Let's Eat 🍴</Text>
+          <Text style={styles.subtitle}>
+            {t('welcome.subtitle', 'Descubra. Avalie. Viva experiências incríveis.')}
+          </Text>
         </View>
       </LinearGradient>
 
-      <View style={styles.bottomArea}>
-        <Button
-          title={t('welcome.emailButton', 'Criar conta com e-mail')}
-          onPress={handleEmailPress}
-          variant="primary"
-          style={styles.button}
-        />
-        
-        <Button
-          title={t('welcome.googleButton', 'Continuar com Google')}
-          onPress={handleGooglePress}
-          variant="outline"
-          style={styles.button}
-        />
+      <View style={styles.bottomHalf}>
+        <Text style={styles.heading}>
+          {t('welcome.heading', 'Como você deseja continuar?')}
+        </Text>
 
-        <Button
-          title={t('welcome.guestButton', 'Entrar como convidado')}
-          onPress={handleGuestPress}
-          variant="ghost"
-          style={styles.button}
-          loading={isLoading}
-        />
+        <View style={styles.buttonContainer}>
+          <Button
+            title={t('welcome.email_btn', 'Criar uma conta com e-mail')}
+            onPress={() => router.push('/(auth)/register')}
+            variant="primary"
+            fullWidth
+            style={styles.button}
+          />
+          
+          <Button
+            title={t('welcome.google_btn', 'Conectar com Google')}
+            onPress={handleGoogleLogin}
+            variant="outline"
+            icon="logo-google"
+            fullWidth
+            style={styles.button}
+          />
+
+          <Button
+            title={t('welcome.guest_btn', 'Entrar como convidado sem cadastro')}
+            onPress={handleGuestLogin}
+            variant="ghost"
+            fullWidth
+            style={styles.button}
+          />
+        </View>
 
         <Text style={styles.footerText}>
-          {t('welcome.terms', 'Ao continuar, você concorda com nossa ')}
-          <Text style={styles.link}>{t('welcome.privacyPolicy', 'Política de Privacidade')}</Text>
+          {t('welcome.terms', 'Ao continuar, você concorda com os ')}
+          <Link href="/privacy-policy" asChild>
+            <TouchableOpacity>
+              <Text style={styles.linkText}>{t('welcome.terms_link', 'Termos de Uso e Política de Privacidade')}</Text>
+            </TouchableOpacity>
+          </Link>
         </Text>
       </View>
     </View>
@@ -86,37 +105,47 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  topArea: {
-    flex: 0.5,
+  topHalf: {
+    height: height * 0.45,
     justifyContent: 'center',
     alignItems: 'center',
+    borderBottomLeftRadius: BorderRadius.xl,
+    borderBottomRightRadius: BorderRadius.xl,
   },
   logoContainer: {
     alignItems: 'center',
+    paddingHorizontal: Spacing.xl,
   },
-  emoji: {
-    fontSize: 64,
-    marginBottom: Spacing.md,
-  },
-  title: {
+  logoText: {
     ...Typography.h1,
-    color: Colors.surface,
-    marginBottom: Spacing.sm,
-    fontWeight: 'bold',
+    color: Colors.white,
+    fontSize: 42,
+    marginBottom: Spacing.md,
+    textAlign: 'center',
   },
-  tagline: {
-    ...Typography.body,
-    color: Colors.surface,
+  subtitle: {
+    ...Typography.body1,
+    color: Colors.white,
+    textAlign: 'center',
     opacity: 0.9,
   },
-  bottomArea: {
-    flex: 0.5,
-    padding: Spacing.lg,
-    justifyContent: 'center',
-    backgroundColor: Colors.background,
+  bottomHalf: {
+    flex: 1,
+    padding: Spacing.xl,
+    justifyContent: 'space-between',
+    paddingTop: Spacing.xxl,
+  },
+  heading: {
+    ...Typography.h3,
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+  },
+  buttonContainer: {
+    gap: Spacing.md,
   },
   button: {
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   footerText: {
     ...Typography.caption,
@@ -124,8 +153,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: Spacing.xl,
   },
-  link: {
+  linkText: {
+    ...Typography.caption,
     color: Colors.primary,
-    textDecorationLine: 'underline',
+    fontFamily: Typography.fontFamily.semiBold,
   },
 });

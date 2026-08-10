@@ -1,74 +1,110 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
-import { Typography, Spacing, BorderRadius } from '../../constants/theme';
+import { Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import { getReviewsByUser } from '../../services/firebase/firestore';
 import { useAuthStore } from '../../stores/authStore';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-
-const RestaurantCard = ({ item, onPress }: { item: any, onPress: () => void }) => (
-  <TouchableOpacity style={styles.card} onPress={onPress}>
-    <Text style={styles.cardTitle}>{item.placeName}</Text>
-    <Text style={styles.ratingText}>⭐ {item.rating} Avaliação</Text>
-    <Text style={styles.detailsText}>{item.comment}</Text>
-  </TouchableOpacity>
-);
+import StarRating from '../../components/ui/StarRating';
+import Chip from '../../components/ui/Chip';
 
 export default function ReviewsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState('Todas');
   const { user } = useAuthStore();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user?.uid) {
-      getReviewsByUser(user.uid).then((data) => {
-        setReviews(data as any);
-      }).catch(console.error).finally(() => setLoading(false));
+      getReviewsByUser(user.uid)
+        .then((data) => {
+          setReviews(data);
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
   }, [user?.uid]);
 
+  const filteredReviews = reviews.filter(r => 
+    r.placeName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filters = ['Todas', 'Italiana', 'Japonesa', '$$$'];
+
   if (loading) return <LoadingSpinner fullScreen />;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>{t('reviews.title', 'Avaliações')}</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>{t('reviews.title', 'Avaliações')}</Text>
+        <TouchableOpacity style={styles.headerIcon}>
+          <Ionicons name="search" size={24} color={Colors.text} />
+        </TouchableOpacity>
+      </View>
       
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#999" />
+        <Ionicons name="search" size={20} color={Colors.textLight} />
         <TextInput 
           style={styles.searchInput}
-          placeholder={t('reviews.searchPlaceholder', 'Buscar avaliações...')}
+          placeholder={t('reviews.searchPlaceholder', 'Buscar restaurantes...')}
+          placeholderTextColor={Colors.textLight}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
       </View>
       
-      <View style={styles.filterRow}>
-        <TouchableOpacity style={styles.chip}><Text style={styles.chipText}>{t('filters.type', 'Tipo')}</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.chip}><Text style={styles.chipText}>{t('filters.price', 'Preço')}</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.chip}><Text style={styles.chipText}>{t('filters.rating', 'Avaliação')}</Text></TouchableOpacity>
+      <View style={styles.filterWrapper}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
+          {filters.map(f => (
+            <Chip 
+              key={f}
+              label={f}
+              selected={activeFilter === f}
+              onPress={() => setActiveFilter(f)}
+              style={styles.chip}
+            />
+          ))}
+        </ScrollView>
       </View>
       
       <FlatList 
-        data={reviews}
-        keyExtractor={(item: any) => item.id}
+        data={filteredReviews}
+        keyExtractor={(item) => item.id}
         renderItem={({item}) => (
-          <RestaurantCard 
-            item={item} 
-            onPress={() => router.push(`/restaurant/${item.placeId}`)} 
-          />
+          <TouchableOpacity 
+            style={styles.card} 
+            onPress={() => router.push(`/restaurant/${item.placeId}`)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>{item.placeName}</Text>
+            </View>
+            
+            <View style={styles.ratingRow}>
+              <StarRating rating={item.rating} size={16} />
+              <Text style={styles.ratingNumber}>{item.rating.toFixed(1)}</Text>
+            </View>
+            
+            <Text style={styles.cardSubtitle}>
+              {item.eventType || 'Geral'} • {new Date(item.createdAt).toLocaleDateString()}
+            </Text>
+            
+            {item.comment ? (
+              <Text style={styles.comment} numberOfLines={2}>{item.comment}</Text>
+            ) : null}
+          </TouchableOpacity>
         )}
         ListEmptyComponent={() => (
           <View style={styles.emptyState}>
-            <Ionicons name="document-text-outline" size={48} color={Colors.textSecondary} />
+            <Ionicons name="document-text-outline" size={64} color={Colors.border} />
             <Text style={styles.emptyText}>{t('reviews.empty', 'Nenhuma avaliação encontrada.')}</Text>
           </View>
         )}
@@ -79,18 +115,107 @@ export default function ReviewsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background, paddingTop: 60, paddingHorizontal: Spacing.lg },
-  header: { ...Typography.h1, marginBottom: Spacing.lg, color: Colors.text },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, borderRadius: BorderRadius.md, paddingHorizontal: Spacing.md, height: 48, marginBottom: Spacing.lg },
-  searchInput: { flex: 1, marginLeft: Spacing.md, ...Typography.body1 },
-  filterRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.xl },
-  chip: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm, borderRadius: BorderRadius.full, backgroundColor: Colors.lightGray },
-  chipText: { fontFamily: Typography.fontFamily.semiBold, color: Colors.text },
-  card: { padding: Spacing.lg, borderRadius: BorderRadius.md, backgroundColor: Colors.surface, marginBottom: Spacing.md, elevation: 2, shadowColor: Colors.shadow, shadowOpacity: 0.1, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  cardTitle: { ...Typography.h3, color: Colors.primary, marginBottom: 4 },
-  ratingText: { fontFamily: Typography.fontFamily.semiBold, color: Colors.text, marginBottom: 4 },
-  detailsText: { ...Typography.body2, color: Colors.textSecondary },
-  listContent: { paddingBottom: Spacing.xxl, flexGrow: 1 },
-  emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 100 },
-  emptyText: { marginTop: Spacing.lg, color: Colors.textSecondary, ...Typography.body1 }
+  container: { 
+    flex: 1, 
+    backgroundColor: Colors.background, 
+    paddingTop: 60, 
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
+  header: { 
+    ...Typography.h1, 
+    color: Colors.text 
+  },
+  headerIcon: {
+    padding: Spacing.sm,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.full,
+    ...Shadows.sm,
+  },
+  searchContainer: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: Colors.surface, 
+    borderRadius: BorderRadius.md, 
+    paddingHorizontal: Spacing.md, 
+    height: 48, 
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...Shadows.sm,
+  },
+  searchInput: { 
+    flex: 1, 
+    marginLeft: Spacing.sm, 
+    ...Typography.body, 
+    color: Colors.text 
+  },
+  filterWrapper: {
+    marginBottom: Spacing.md,
+  },
+  filterRow: { 
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  chip: {
+    marginRight: Spacing.xs,
+  },
+  card: { 
+    padding: Spacing.lg, 
+    borderRadius: BorderRadius.lg, 
+    backgroundColor: Colors.surface, 
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.md, 
+    ...Shadows.sm,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
+  cardTitle: { 
+    ...Typography.h3, 
+    color: Colors.text,
+    flex: 1,
+  },
+  ratingRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
+  ratingNumber: {
+    ...Typography.label,
+    color: Colors.text,
+    marginLeft: Spacing.xs,
+  },
+  cardSubtitle: { 
+    ...Typography.body2, 
+    color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
+  },
+  comment: {
+    ...Typography.body1,
+    color: Colors.text,
+    fontStyle: 'italic',
+  },
+  listContent: { 
+    paddingBottom: Spacing.xxxl, 
+    flexGrow: 1,
+  },
+  emptyState: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginTop: 100 
+  },
+  emptyText: { 
+    marginTop: Spacing.lg, 
+    color: Colors.textSecondary, 
+    ...Typography.body 
+  }
 });

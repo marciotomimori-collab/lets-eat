@@ -1,150 +1,141 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
-import { Spacing, Typography } from '../../constants/theme';
+import { Typography, Spacing, BorderRadius } from '../../constants/theme';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import Chip from '../../components/ui/Chip';
-import { useTranslation } from 'react-i18next';
-import { updateUserProfile } from '../../services/firebase/firestore';
-import { CUISINE_TYPES } from '../../constants/cuisineTypes';
 import { useAuthStore } from '../../stores/authStore';
+import { useUserStore } from '../../stores/userStore';
 
 export default function OnboardingScreen() {
+  const router = useRouter();
   const { t } = useTranslation();
-  const [displayName, setDisplayName] = useState('');
+  const { user } = useAuthStore();
+  const { updateProfile } = useUserStore();
+
+  const [name, setName] = useState(user?.displayName || '');
   const [age, setAge] = useState('');
-  const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const user = useAuthStore((state) => state.user);
 
-  const toggleCuisine = (cuisineKey: string) => {
-    setSelectedCuisines((prev) =>
-      prev.includes(cuisineKey)
-        ? prev.filter((id) => id !== cuisineKey)
-        : [...prev, cuisineKey]
-    );
-  };
-
-  const handleContinue = async () => {
-    try {
-      setIsLoading(true);
-      if (user?.uid) {
-        await updateUserProfile(user.uid, {
-          displayName,
-          age: parseInt(age, 10) || undefined,
-          foodPreferences: selectedCuisines,
-        });
-      }
-      router.replace('/(tabs)' as any);
-    } catch (error) {
-      console.error('Error saving profile:', error);
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (user?.displayName) {
+      setName(user.displayName);
     }
+  }, [user]);
+
+  const handleContinue = () => {
+    updateProfile({
+      displayName: name,
+      age: age ? parseInt(age, 10) : undefined,
+    });
+    router.push('/(auth)/onboarding-cuisines' as any);
   };
 
-  const handleSkip = () => {
-    router.replace('/(tabs)' as any);
-  };
+  const isFormValid = name.trim().length > 0;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{t('onboarding.title', 'Vamos nos conhecer! 👋')}</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatarPlaceholder}>
+              <Ionicons name="person" size={48} color={Colors.textLight} />
+            </View>
+          </View>
 
-      <Input
-        label={t('onboarding.name', 'Nome')}
-        placeholder="Como quer ser chamado?"
-        value={displayName}
-        onChangeText={setDisplayName}
-      />
+          <View style={styles.textContainer}>
+            <Text style={styles.title}>{t('onboarding.title', 'Complete seu perfil')}</Text>
+            <Text style={styles.subtitle}>
+              {t('onboarding.subtitle', 'Isso nos ajuda a te mostrar melhores sugestões.')}
+            </Text>
+          </View>
 
-      <View style={styles.spacer} />
+          <View style={styles.form}>
+            <Input
+              label={t('onboarding.name', 'Nome')}
+              placeholder={t('onboarding.name_placeholder', 'Digite seu nome')}
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+            />
 
-      <Input
-        label={t('onboarding.age', 'Idade')}
-        placeholder="Sua idade"
-        value={age}
-        onChangeText={setAge}
-        keyboardType="numeric"
-      />
+            <Input
+              label={t('onboarding.age', 'Idade (opcional)')}
+              placeholder={t('onboarding.age_placeholder', 'Selecione sua idade')}
+              value={age}
+              onChangeText={setAge}
+              keyboardType="number-pad"
+              maxLength={3}
+            />
+          </View>
+        </ScrollView>
 
-      <Text style={styles.sectionTitle}>
-        {t('onboarding.cuisineQuestion', 'Que tipos de comida você curte?')}
-      </Text>
-
-      <View style={styles.chipGrid}>
-        {CUISINE_TYPES.map((cuisine) => (
-          <Chip
-            key={cuisine.key}
-            label={cuisine.labelPt}
-            selected={selectedCuisines.includes(cuisine.key)}
-            onPress={() => toggleCuisine(cuisine.key)}
-            style={styles.chip}
+        <View style={styles.footer}>
+          <Button
+            title={t('onboarding.continue', 'Continuar')}
+            onPress={handleContinue}
+            variant="primary"
+            fullWidth
+            disabled={!isFormValid}
           />
-        ))}
-      </View>
-
-      <Button
-        title={t('onboarding.continue', 'Continuar')}
-        onPress={handleContinue}
-        variant="primary"
-        loading={isLoading}
-        style={styles.button}
-      />
-
-      <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
-        <Text style={styles.skipText}>{t('onboarding.skip', 'Pular por agora')}</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
   },
-  content: {
-    padding: Spacing.lg,
-    paddingTop: Spacing.xxl,
+  container: {
+    flex: 1,
   },
-  spacer: {
-    height: Spacing.md,
+  scrollContent: {
+    flexGrow: 1,
+    padding: Spacing.xl,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+    marginTop: Spacing.xxl,
+    marginBottom: Spacing.xl,
+  },
+  avatarPlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textContainer: {
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
   },
   title: {
-    ...Typography.h1,
+    ...Typography.h2,
     color: Colors.text,
-    marginBottom: Spacing.xl,
-  },
-  sectionTitle: {
-    ...Typography.h3,
-    color: Colors.text,
-    marginTop: Spacing.xl,
-    marginBottom: Spacing.md,
-  },
-  chipGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-    marginBottom: Spacing.xl,
-  },
-  chip: {
-    marginRight: Spacing.xs,
     marginBottom: Spacing.xs,
+    textAlign: 'center',
   },
-  button: {
-    marginTop: Spacing.md,
-  },
-  skipButton: {
-    alignItems: 'center',
-    padding: Spacing.md,
-    marginTop: Spacing.sm,
-  },
-  skipText: {
-    ...Typography.body,
+  subtitle: {
+    ...Typography.body1,
     color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  form: {
+    gap: Spacing.md,
+  },
+  footer: {
+    padding: Spacing.xl,
+    backgroundColor: Colors.background,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
   },
 });

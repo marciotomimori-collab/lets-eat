@@ -1,86 +1,191 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
-import { Typography, Spacing, BorderRadius } from '../../constants/theme';
+import { Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import { useAchievements } from '../../hooks/useAchievements';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 export default function AchievementsScreen() {
   const { t } = useTranslation();
   const { achievements, isLoaded } = useAchievements();
-  
-  const renderCard = (key: string, title: string, icon: string, status: 'locked' | 'unlocked' | 'progress', progressText: string = '') => {
-    const isLocked = status === 'locked';
-    const inProgress = status === 'progress';
-    return (
-      <View style={[styles.card, isLocked && styles.cardLocked]} key={key}>
-        {isLocked ? (
-          <Ionicons name="lock-closed" size={32} color="#999" />
-        ) : (
-          <Text style={styles.emoji}>{icon}</Text>
-        )}
-        {status === 'unlocked' && (
-          <Ionicons name="checkmark-circle" size={24} color="#4CAF50" style={styles.checkIcon} />
-        )}
-        {inProgress && <Text style={styles.progressText}>{progressText}</Text>}
-        <Text style={[styles.cardTitle, isLocked && styles.lockedText]} numberOfLines={2}>
-          {isLocked ? '???' : title}
-        </Text>
-      </View>
-    );
-  };
 
-  const unlocked = achievements?.filter(a => a.isUnlocked) || [];
-  const inProgress = achievements?.filter(a => !a.isUnlocked && a.progress > 0) || [];
-  const locked = achievements?.filter(a => !a.isUnlocked && a.progress === 0) || [];
+  if (!isLoaded) return <LoadingSpinner fullScreen />;
+
+  const unlockedCount = achievements.filter(a => a.isUnlocked).length;
+  const totalCount = achievements.length;
+  const progressPercent = totalCount > 0 ? (unlockedCount / totalCount) * 100 : 0;
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>🏆 {t('achievements.title', 'Conquistas')}</Text>
-      
-      {unlocked.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>{t('achievements.unlocked', 'Desbloqueadas')}</Text>
-          <View style={styles.grid}>
-            {unlocked.map((ach) => renderCard(ach.key, ach.title, ach.emoji, 'unlocked'))}
-          </View>
-        </>
-      )}
+    <View style={styles.container}>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>{t('achievements.title', 'Conquistas')}</Text>
+        <TouchableOpacity style={styles.headerIcon}>
+          <Ionicons name="share-social-outline" size={24} color={Colors.text} />
+        </TouchableOpacity>
+      </View>
 
-      {inProgress.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>{t('achievements.inProgress', 'Em progresso')}</Text>
-          <View style={styles.grid}>
-            {inProgress.map((ach) => renderCard(ach.key, ach.title, ach.emoji, 'progress', `${ach.progress}/${ach.target}`))}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.progressSection}>
+          <Text style={styles.progressLabel}>{t('achievements.progress', 'Seu progresso')}</Text>
+          <Text style={styles.progressNumber}>{unlockedCount}/{totalCount}</Text>
+          <Text style={styles.progressSubtitle}>{t('achievements.unlocked', 'conquistas desbloqueadas')}</Text>
+          
+          <View style={styles.progressBarBg}>
+            <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
           </View>
-        </>
-      )}
+        </View>
 
-      {locked.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>{t('achievements.locked', 'Bloqueadas')}</Text>
-          <View style={styles.grid}>
-            {locked.map((ach) => renderCard(ach.key, ach.title, ach.emoji, 'locked'))}
-          </View>
-        </>
-      )}
+        <Text style={styles.sectionTitle}>{t('achievements.recent', 'Conquistas recentes')}</Text>
 
-      <View style={{height: 40}} />
-    </ScrollView>
+        <View style={styles.grid}>
+          {achievements.map((item) => (
+            <View key={item.key} style={[styles.card, !item.isUnlocked && styles.cardLocked]}>
+              <Text style={styles.cardEmoji}>{item.emoji}</Text>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              
+              {item.isUnlocked ? (
+                <View style={styles.statusRow}>
+                  <Ionicons name="checkmark-circle" size={14} color={Colors.success} />
+                  <Text style={styles.statusUnlocked}>{t('achievements.completed', 'Completado')}</Text>
+                </View>
+              ) : (
+                <View style={styles.statusRow}>
+                  <Text style={styles.statusLocked}>
+                    {item.progress}/{item.target}
+                  </Text>
+                </View>
+              )}
+            </View>
+          ))}
+        </View>
+
+        <TouchableOpacity style={styles.viewAllBtn}>
+          <Text style={styles.viewAllText}>{t('achievements.viewAll', 'Ver todas')}</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background, paddingTop: 60, paddingHorizontal: Spacing.lg },
-  header: { ...Typography.h1, marginBottom: Spacing.xxl, color: Colors.text },
-  sectionTitle: { ...Typography.h3, color: Colors.textSecondary, marginBottom: Spacing.md, marginTop: Spacing.lg },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md },
-  card: { width: '31%', aspectRatio: 0.85, backgroundColor: Colors.surface, borderRadius: BorderRadius.md, padding: Spacing.sm, alignItems: 'center', justifyContent: 'center', elevation: 1 },
-  cardLocked: { backgroundColor: Colors.lightGray, opacity: 0.6 },
-  emoji: { fontSize: 32, marginBottom: Spacing.sm },
-  checkIcon: { position: 'absolute', top: 4, right: 4, backgroundColor: Colors.surface, borderRadius: BorderRadius.md },
-  cardTitle: { ...Typography.caption, textAlign: 'center', fontFamily: Typography.fontFamily.semiBold, marginTop: 4, color: Colors.text },
-  lockedText: { color: Colors.textSecondary },
-  progressText: { ...Typography.caption, color: Colors.primary, fontFamily: Typography.fontFamily.bold, marginTop: 4 }
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    paddingTop: 60,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
+  header: {
+    ...Typography.h1,
+    color: Colors.text,
+  },
+  headerIcon: {
+    padding: Spacing.sm,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.full,
+    ...Shadows.sm,
+  },
+  scrollContent: {
+    paddingBottom: Spacing.xxxl,
+    paddingHorizontal: Spacing.lg,
+  },
+  progressSection: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+    ...Shadows.sm,
+  },
+  progressLabel: {
+    ...Typography.h4,
+    color: Colors.textSecondary,
+  },
+  progressNumber: {
+    ...Typography.display,
+    color: Colors.primary,
+    marginVertical: Spacing.xs,
+  },
+  progressSubtitle: {
+    ...Typography.body2,
+    color: Colors.textLight,
+    marginBottom: Spacing.lg,
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 12,
+    backgroundColor: Colors.lightRed,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: Colors.primary,
+    borderRadius: 6,
+  },
+  sectionTitle: {
+    ...Typography.h3,
+    color: Colors.text,
+    marginBottom: Spacing.lg,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
+  },
+  card: {
+    width: '47%',
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+    ...Shadows.sm,
+  },
+  cardLocked: {
+    opacity: 0.6,
+  },
+  cardEmoji: {
+    fontSize: 40,
+    marginBottom: Spacing.sm,
+  },
+  cardTitle: {
+    ...Typography.label,
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: Spacing.xs,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: Spacing.xs,
+  },
+  statusUnlocked: {
+    ...Typography.caption,
+    color: Colors.success,
+    fontFamily: Typography.fontFamily.medium,
+  },
+  statusLocked: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+  },
+  viewAllBtn: {
+    marginTop: Spacing.lg,
+    alignItems: 'center',
+    padding: Spacing.md,
+  },
+  viewAllText: {
+    ...Typography.body,
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.semiBold,
+  },
 });

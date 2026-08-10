@@ -1,115 +1,209 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
-import { Typography, Spacing, BorderRadius } from '../../constants/theme';
-import { useAuthStore } from '../../stores/authStore';
+import { Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import { useUserStore } from '../../stores/userStore';
+import { useAuthStore } from '../../stores/authStore';
+import Button from '../../components/ui/Button';
 
-interface SectionRowProps {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  onPress?: () => void;
-  color?: string;
-}
+const SettingsRow = ({ icon, title, value, onPress, isDestructive }: any) => (
+  <TouchableOpacity style={styles.row} onPress={onPress}>
+    <View style={styles.rowLeft}>
+      <Ionicons name={icon} size={22} color={isDestructive ? Colors.error : Colors.primary} />
+      <Text style={[styles.rowTitle, isDestructive && { color: Colors.error }]}>{title}</Text>
+    </View>
+    <View style={styles.rowRight}>
+      {value ? <Text style={styles.rowValue}>{value}</Text> : null}
+      <Ionicons name="chevron-forward" size={20} color={Colors.textLight} />
+    </View>
+  </TouchableOpacity>
+);
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { logout, user } = useAuthStore();
   const { profile } = useUserStore();
+  const { logout } = useAuthStore();
 
-  const handleLogout = () => {
-    Alert.alert(
-      t('settings.logoutTitle', 'Sair'),
-      t('settings.logoutConfirm', 'Tem certeza que deseja sair?'),
-      [
-        { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
-        { text: t('common.yes', 'Sim'), onPress: () => {
-          logout?.();
-          router.replace('/(auth)/welcome');
-        }, style: 'destructive' }
-      ]
-    );
+  const handleExportData = () => {
+    // Export functionality
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      t('settings.deleteTitle', 'Excluir Conta'),
-      t('settings.deleteConfirm', 'Esta ação é irreversível. Deseja continuar?'),
-      [
-        { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
-        { text: t('common.delete', 'Excluir'), onPress: () => console.log('Delete acc'), style: 'destructive' }
-      ]
-    );
+    // Delete account functionality
   };
 
-  const SectionRow: React.FC<SectionRowProps> = ({ icon, title, onPress, color = '#333' }) => (
-    <TouchableOpacity style={styles.row} onPress={onPress} disabled={!onPress}>
-      <View style={styles.rowLeft}>
-        <Ionicons name={icon} size={22} color={color} style={styles.rowIcon} />
-        <Text style={[styles.rowTitle, { color }]}>{title}</Text>
-      </View>
-      {onPress && <Ionicons name="chevron-forward" size={20} color="#ccc" />}
-    </TouchableOpacity>
-  );
+  const userName = profile?.displayName || 'Usuário';
+  const initial = userName.charAt(0).toUpperCase();
+  const language = profile?.language === 'en' ? 'English' : 'Português';
+  const radius = profile?.defaultRadius ? `${profile.defaultRadius} km` : '5 km';
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>{t('settings.title', 'Configurações')}</Text>
-      
-      <View style={styles.profileCard}>
-        <View style={styles.avatar}><Text style={styles.avatarText}>{profile?.displayName?.charAt(0) || user?.email?.charAt(0) || 'U'}</Text></View>
-        <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>{profile?.displayName || 'Usuário'}</Text>
-          <Text style={styles.profileEmail}>{user?.email || ''}</Text>
+    <View style={styles.container}>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>{t('settings.title', 'Configurações')}</Text>
+        <TouchableOpacity style={styles.headerIcon}>
+          <Ionicons name="pencil-outline" size={24} color={Colors.text} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.profileCard}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initial}</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{userName}</Text>
+            <TouchableOpacity>
+              <Text style={styles.viewProfileText}>{t('settings.viewProfile', 'Ver perfil')}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <TouchableOpacity><Text style={styles.editBtn}>{t('settings.edit', 'Editar')}</Text></TouchableOpacity>
-      </View>
 
-      <Text style={styles.sectionHeader}>{t('settings.preferences', 'Preferências')}</Text>
-      <View style={styles.section}>
-        <SectionRow icon="language" title={t('settings.language', 'Idioma')} />
-        <SectionRow icon="location" title={t('settings.radius', 'Raio Padrão')} />
-        <SectionRow icon="restaurant" title={t('settings.cuisines', 'Cozinhas Favoritas')} />
-        <SectionRow icon="cash" title={t('settings.price', 'Preço Padrão')} />
-      </View>
+        <View style={styles.section}>
+          <SettingsRow icon="globe-outline" title={t('settings.language', 'Idioma')} value={language} onPress={() => {}} />
+          <SettingsRow icon="location-outline" title={t('settings.radius', 'Raio máximo padrão')} value={radius} onPress={() => {}} />
+          <SettingsRow icon="settings-outline" title={t('settings.preferences', 'Preferências padrão')} onPress={() => {}} />
+          <SettingsRow icon="notifications-outline" title={t('settings.notifications', 'Notificações')} onPress={() => {}} />
+        </View>
 
-      <Text style={styles.sectionHeader}>{t('settings.privacy', 'Privacidade')}</Text>
-      <View style={styles.section}>
-        <SectionRow icon="shield-checkmark" title={t('settings.privacyPolicy', 'Política de Privacidade')} onPress={() => router.push('/privacy-policy')} />
-        <SectionRow icon="download" title={t('settings.exportData', 'Exportar Dados')} />
-        <SectionRow icon="trash" title={t('settings.deleteAccount', 'Excluir Conta')} onPress={handleDeleteAccount} color="#E53935" />
-      </View>
+        <View style={styles.section}>
+          <SettingsRow 
+            icon="lock-closed-outline" 
+            title={t('settings.privacy', 'Privacidade e dados')} 
+            onPress={() => router.push('/privacy-policy')} 
+          />
+          <SettingsRow icon="help-circle-outline" title={t('settings.help', 'Ajuda e suporte')} onPress={() => {}} />
+        </View>
 
-      <Text style={styles.sectionHeader}>{t('settings.account', 'Conta')}</Text>
-      <View style={styles.section}>
-        <SectionRow icon="link" title={t('settings.linkGoogle', 'Vincular Google')} />
-        <SectionRow icon="log-out" title={t('settings.logout', 'Sair')} onPress={handleLogout} color="#E53935" />
-      </View>
-
-      <Text style={styles.version}>Let's Eat v1.0.0</Text>
-    </ScrollView>
+        <View style={styles.actionButtons}>
+          <Button 
+            title={t('settings.exportData', 'Exportar meus dados')} 
+            variant="outline" 
+            onPress={handleExportData}
+            style={styles.actionBtn}
+          />
+          <Button 
+            title={t('settings.deleteAccount', 'Excluir minha conta')} 
+            variant="secondary"
+            onPress={handleDeleteAccount}
+            style={[styles.actionBtn, { backgroundColor: Colors.lightRed, borderColor: Colors.error }]}
+          />
+          <Button 
+            title={t('settings.logout', 'Sair')} 
+            variant="ghost" 
+            onPress={logout}
+            style={styles.actionBtn}
+          />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  header: { ...Typography.h1, marginVertical: Spacing.xxl, marginHorizontal: Spacing.lg, color: Colors.text, paddingTop: Spacing.xxl },
-  profileCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, padding: Spacing.lg, marginBottom: Spacing.xxl, marginHorizontal: Spacing.lg, borderRadius: BorderRadius.md },
-  avatar: { width: 50, height: 50, borderRadius: BorderRadius.full, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: Colors.surface, ...Typography.h3 },
-  profileInfo: { flex: 1, marginLeft: Spacing.md },
-  profileName: { ...Typography.h3, color: Colors.text },
-  profileEmail: { ...Typography.body2, color: Colors.textSecondary },
-  editBtn: { color: Colors.primary, ...Typography.body1, fontFamily: Typography.fontFamily.semiBold },
-  sectionHeader: { ...Typography.label, color: Colors.textSecondary, textTransform: 'uppercase', marginHorizontal: Spacing.lg, marginBottom: Spacing.sm },
-  section: { backgroundColor: Colors.surface, borderRadius: BorderRadius.md, marginHorizontal: Spacing.lg, marginBottom: Spacing.xxl, overflow: 'hidden' },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: Spacing.lg, borderBottomWidth: 1, borderBottomColor: Colors.borderLight },
-  rowLeft: { flexDirection: 'row', alignItems: 'center' },
-  rowIcon: { marginRight: Spacing.md },
-  rowTitle: { ...Typography.body1 },
-  version: { textAlign: 'center', color: Colors.textSecondary, marginBottom: Spacing.section, marginTop: Spacing.sm, ...Typography.body2 }
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    paddingTop: 60,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
+  header: {
+    ...Typography.h1,
+    color: Colors.text,
+  },
+  headerIcon: {
+    padding: Spacing.sm,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.full,
+    ...Shadows.sm,
+  },
+  scrollContent: {
+    paddingBottom: Spacing.xxxl,
+    paddingHorizontal: Spacing.lg,
+  },
+  profileCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.xl,
+    ...Shadows.sm,
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.lg,
+  },
+  avatarText: {
+    ...Typography.h2,
+    color: Colors.white,
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    ...Typography.h3,
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  viewProfileText: {
+    ...Typography.body2,
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.medium,
+  },
+  section: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.lg,
+    overflow: 'hidden',
+    ...Shadows.sm,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  rowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rowTitle: {
+    ...Typography.body,
+    color: Colors.text,
+    marginLeft: Spacing.md,
+  },
+  rowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rowValue: {
+    ...Typography.body2,
+    color: Colors.textSecondary,
+    marginRight: Spacing.sm,
+  },
+  actionButtons: {
+    marginTop: Spacing.xl,
+    gap: Spacing.md,
+  },
+  actionBtn: {
+    marginBottom: Spacing.sm,
+  }
 });

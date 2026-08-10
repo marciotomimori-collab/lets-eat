@@ -10,7 +10,17 @@ export function useAuth() {
 
   useEffect(() => {
     setLoading(true);
+    let isResolved = false;
+
+    const fallbackTimeout = setTimeout(() => {
+      if (!isResolved) {
+        console.warn('Auth listener timeout: fallback triggered');
+        setLoading(false);
+      }
+    }, 2000);
+
     const unsubscribe = onAuthChange(async (user) => {
+      isResolved = true;
       setUser(user);
       if (user) {
         try {
@@ -23,8 +33,12 @@ export function useAuth() {
       } else {
         setProfile(null);
       }
+      setLoading(false); // Ensure loading is false after auth resolves
     });
-    return unsubscribe;
+    return () => {
+      clearTimeout(fallbackTimeout);
+      unsubscribe();
+    };
   }, []);
 
   return useAuthStore();

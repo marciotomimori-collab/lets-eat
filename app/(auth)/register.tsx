@@ -1,188 +1,169 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
-import { router } from 'expo-router';
-
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
-import { Spacing, Typography } from '../../constants/theme';
+import { Typography, Spacing } from '../../constants/theme';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
-import { useTranslation } from 'react-i18next';
-import { signUpWithEmail } from '../../services/firebase/auth';
-import { createUserProfile } from '../../services/firebase/firestore';
+import { useAuthStore } from '../../stores/authStore';
+import { User } from 'firebase/auth';
 
 export default function RegisterScreen() {
+  const router = useRouter();
   const { t } = useTranslation();
+  const { setUser } = useAuthStore();
+
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [agreed, setAgreed] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!email.includes('@')) newErrors.email = 'E-mail inválido';
-    if (password.length < 6) newErrors.password = 'A senha deve ter no mínimo 6 caracteres';
-    if (password !== confirmPassword) newErrors.confirmPassword = 'As senhas não coincidem';
-    if (!agreed) newErrors.agreed = 'Você deve aceitar a Política de Privacidade';
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleRegister = async () => {
-    if (!validate()) return;
-    
-    try {
-      setIsLoading(true);
-      const result = await signUpWithEmail(email, password);
-      if (result && result.user) {
-        await createUserProfile(result.user.uid, { email });
-        router.replace('/(auth)/onboarding');
-      }
-    } catch (error: any) {
-      setErrors({ form: error.message || 'Erro ao registrar' });
-    } finally {
-      setIsLoading(false);
+  const handleRegister = () => {
+    if (!name || !email || !password) {
+      setError(t('register.error_empty', 'Por favor, preencha todos os campos.'));
+      return;
     }
+
+    if (password.length < 6) {
+      setError(t('register.error_password', 'A senha deve ter no mínimo 6 caracteres.'));
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    // Mock register
+    setTimeout(() => {
+      const mockUser = {
+        uid: 'email-user-123',
+        isAnonymous: false,
+        email: email,
+        displayName: name,
+      } as unknown as User;
+
+      setUser(mockUser);
+      router.replace('/(auth)/onboarding');
+    }, 1000);
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backText}>← Voltar</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.title}>{t('register.title', 'Criar sua conta')}</Text>
-
-        <View style={styles.form}>
-          <Input
-            label={t('register.email', 'E-mail')}
-            placeholder="Seu e-mail"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            error={errors.email}
-          />
-
-          <Input
-            label={t('register.password', 'Senha')}
-            placeholder="Sua senha"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            error={errors.password}
-          />
-
-          <Input
-            label={t('register.confirmPassword', 'Confirmar senha')}
-            placeholder="Confirme sua senha"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            error={errors.confirmPassword}
-          />
-
-          <TouchableOpacity
-            style={styles.checkboxContainer}
-            onPress={() => setAgreed(!agreed)}
-          >
-            <View style={[styles.checkbox, agreed && styles.checkboxChecked]}>
-              {agreed && <View style={styles.checkboxInner} />}
-            </View>
-            <Text style={styles.checkboxLabel}>
-              {t('register.agreeText', 'Li e aceito a Política de Privacidade')}
-            </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={Colors.text} />
           </TouchableOpacity>
-          {errors.agreed && <Text style={styles.errorText}>{errors.agreed}</Text>}
-          {errors.form && <Text style={styles.errorText}>{errors.form}</Text>}
-
-          <Button
-            title={t('register.submit', 'Criar Conta')}
-            onPress={handleRegister}
-            variant="primary"
-            loading={isLoading}
-            style={styles.submitButton}
-          />
+          <Text style={styles.title}>{t('register.title', 'Criar conta')}</Text>
+          <View style={{ width: 24 }} />
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.form}>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+            <Input
+              label={t('register.name', 'Nome')}
+              placeholder={t('register.name_placeholder', 'Seu nome')}
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+            />
+
+            <Input
+              label={t('register.email', 'E-mail')}
+              placeholder={t('register.email_placeholder', 'seu@email.com')}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <Input
+              label={t('register.password', 'Senha')}
+              placeholder={t('register.password_placeholder', '••••••••')}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              error={password.length > 0 && password.length < 6 ? t('register.password_helper', 'Mínimo 6 caracteres') : undefined}
+            />
+
+            <Button
+              title={t('register.submit', 'Criar conta')}
+              onPress={handleRegister}
+              variant="primary"
+              fullWidth
+              loading={loading}
+              style={styles.submitButton}
+            />
+          </View>
+        </ScrollView>
+
+        <TouchableOpacity onPress={() => router.replace('/(auth)/welcome')} style={styles.footer}>
+          <Text style={styles.footerText}>
+            {t('register.has_account', 'Já tem uma conta? ')}
+            <Text style={styles.footerLink}>{t('register.login', 'Entrar')}</Text>
+          </Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
   },
-  scrollContent: {
-    padding: Spacing.lg,
-    flexGrow: 1,
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
   },
   backButton: {
-    marginTop: Spacing.xl,
-    marginBottom: Spacing.lg,
-  },
-  backText: {
-    ...Typography.body,
-    color: Colors.text,
+    padding: Spacing.xs,
   },
   title: {
-    ...Typography.h1,
+    ...Typography.h2,
     color: Colors.text,
-    marginBottom: Spacing.xl,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: Spacing.xl,
   },
   form: {
     gap: Spacing.md,
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: Spacing.sm,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    borderRadius: 4,
-    marginRight: Spacing.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxChecked: {
-    borderColor: Colors.primary,
-  },
-  checkboxInner: {
-    width: 12,
-    height: 12,
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
-  },
-  checkboxLabel: {
-    ...Typography.body,
-    color: Colors.text,
-    flex: 1,
+    marginTop: Spacing.xl,
   },
   errorText: {
-    ...Typography.caption,
+    ...Typography.body2,
     color: Colors.error,
-    marginTop: 4,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
   },
   submitButton: {
     marginTop: Spacing.lg,
+  },
+  footer: {
+    padding: Spacing.xl,
+    alignItems: 'center',
+  },
+  footerText: {
+    ...Typography.body2,
+    color: Colors.textSecondary,
+  },
+  footerLink: {
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.semiBold,
   },
 });

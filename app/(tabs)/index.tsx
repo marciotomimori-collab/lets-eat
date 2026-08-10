@@ -4,8 +4,6 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Typography, Shadows } from '../../constants/theme';
-import { RestaurantCard } from '../../components/home/RestaurantCard';
-import { RestaurantCardData } from '../../types/restaurant';
 import { useAuthStore } from '../../stores/authStore';
 import { useUserStore } from '../../stores/userStore';
 
@@ -18,11 +16,10 @@ export default function HomeScreen() {
   const { user } = useAuthStore();
   const { profile } = useUserStore();
   const userName = profile?.displayName || user?.email?.split('@')[0] || 'Visitante';
-  const recentVisits: RestaurantCardData[] = []; // Empty state for now
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
-      toValue: 0.95,
+      toValue: 0.9,
       useNativeDriver: true,
     }).start();
   };
@@ -42,12 +39,12 @@ export default function HomeScreen() {
 
   const navigateToSearch = () => {
     setModalVisible(false);
-    router.push('/search-results');
+    router.push('/search-form' as any);
   };
 
   const navigateToSurprise = () => {
     setModalVisible(false);
-    router.push('/surprise'); // Or appropriate route
+    router.push('/surprise' as any);
   };
 
   return (
@@ -56,10 +53,10 @@ export default function HomeScreen() {
         {/* Header Section */}
         <View style={styles.header}>
           <Text style={styles.greeting}>
-            {t('home.greeting', { name: userName, defaultValue: `Olá, ${userName}! 👋` })}
+            Olá, {userName}! 👋
           </Text>
           <Text style={styles.subheading}>
-            {t('home.subheading', 'O que vamos comer hoje?')}
+            Pronto para descobrir novos sabores?
           </Text>
         </View>
 
@@ -72,37 +69,13 @@ export default function HomeScreen() {
             onPress={handleEatPress}
           >
             <Animated.View style={[styles.mainButton, { transform: [{ scale: scaleAnim }] }]}>
-              <Text style={styles.mainButtonEmoji}>🍔</Text>
-              <Text style={styles.mainButtonText}>Vamos Comer?</Text>
+              <Text style={styles.mainButtonText}>Vamos comer?</Text>
             </Animated.View>
           </TouchableOpacity>
         </View>
-
-        {/* Recent Visits */}
-        <View style={styles.recentSection}>
-          <Text style={styles.sectionTitle}>{t('home.recentVisits', 'Últimas visitas')}</Text>
-          {recentVisits.length > 0 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-              {recentVisits.map((visit) => (
-                <View style={styles.cardWrapper} key={visit.placeId}>
-                  <RestaurantCard
-                    data={visit}
-                    onPress={(id) => router.push(`/restaurant/${id}`)}
-                  />
-                </View>
-              ))}
-            </ScrollView>
-          ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>
-                {t('home.noRecentVisits', 'Nenhuma visita recente ainda.')}
-              </Text>
-            </View>
-          )}
-        </View>
       </ScrollView>
 
-      {/* Options Modal */}
+      {/* Bottom Sheet Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -111,16 +84,32 @@ export default function HomeScreen() {
       >
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setModalVisible(false)}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Como você quer escolher?</Text>
+            <Text style={styles.modalTitle}>Como você quer escolher hoje?</Text>
             
-            <TouchableOpacity style={styles.modalOption} onPress={navigateToSearch}>
-              <Text style={styles.modalOptionIcon}>🔍</Text>
-              <Text style={styles.modalOptionText}>Eu sei o que quero</Text>
+            <TouchableOpacity style={styles.modalCard} onPress={navigateToSearch}>
+              <View style={styles.modalCardLeft}>
+                <View style={styles.letterCircle}>
+                  <Text style={styles.letterText}>A</Text>
+                </View>
+                <Text style={styles.modalCardIcon}>🔍</Text>
+              </View>
+              <View style={styles.modalCardBody}>
+                <Text style={styles.modalCardTitle}>Formulário rápido</Text>
+                <Text style={styles.modalCardSubtitle}>Encontre o lugar ideal</Text>
+              </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.modalOption} onPress={navigateToSurprise}>
-              <Text style={styles.modalOptionIcon}>🎲</Text>
-              <Text style={styles.modalOptionText}>Quero ser surpreendido!</Text>
+            <TouchableOpacity style={styles.modalCard} onPress={navigateToSurprise}>
+              <View style={styles.modalCardLeft}>
+                <View style={styles.letterCircle}>
+                  <Text style={styles.letterText}>B</Text>
+                </View>
+                <Text style={styles.modalCardIcon}>🎲</Text>
+              </View>
+              <View style={styles.modalCardBody}>
+                <Text style={styles.modalCardTitle}>Quero ser surpreendido</Text>
+                <Text style={styles.modalCardSubtitle}>Deixe a sorte escolher!</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -132,7 +121,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -141,7 +130,6 @@ const styles = StyleSheet.create({
   header: {
     padding: Spacing.xl,
     paddingTop: Spacing.xxl,
-    backgroundColor: Colors.background, 
   },
   greeting: {
     ...Typography.h2,
@@ -153,51 +141,26 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   mainActionContainer: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     marginVertical: Spacing.xxl,
   },
   mainButton: {
     backgroundColor: Colors.primary,
-    width: 200,
-    height: 200,
-    borderRadius: 100,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.lg,
-  },
-  mainButtonEmoji: {
-    fontSize: 64,
-    marginBottom: Spacing.sm,
+    elevation: 12,
   },
   mainButtonText: {
-    ...Typography.h3,
+    ...Typography.h2,
     color: '#fff',
     fontWeight: 'bold',
-  },
-  recentSection: {
-    padding: Spacing.lg,
-  },
-  sectionTitle: {
-    ...Typography.h3,
-    color: Colors.text,
-    marginBottom: Spacing.md,
-  },
-  horizontalScroll: {
-    flexDirection: 'row',
-  },
-  cardWrapper: {
-    width: 280,
-    marginRight: Spacing.md,
-  },
-  emptyState: {
-    padding: Spacing.xl,
-    alignItems: 'center',
-    backgroundColor: Colors.lightGray,
-    borderRadius: BorderRadius.md,
-  },
-  emptyStateText: {
-    ...Typography.body1,
-    color: Colors.textSecondary,
+    textAlign: 'center',
   },
   modalOverlay: {
     flex: 1,
@@ -214,23 +177,52 @@ const styles = StyleSheet.create({
   modalTitle: {
     ...Typography.h3,
     color: Colors.text,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.xl,
     textAlign: 'center',
   },
-  modalOption: {
+  modalCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.lightGray,
+    backgroundColor: Colors.surface,
     padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    ...Shadows.sm,
   },
-  modalOptionIcon: {
-    fontSize: 24,
+  modalCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginRight: Spacing.md,
   },
-  modalOptionText: {
+  letterCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.sm,
+  },
+  letterText: {
+    color: Colors.primaryDark,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  modalCardIcon: {
+    fontSize: 28,
+  },
+  modalCardBody: {
+    flex: 1,
+  },
+  modalCardTitle: {
     ...Typography.h4,
     color: Colors.text,
+    marginBottom: 2,
+  },
+  modalCardSubtitle: {
+    ...Typography.body2,
+    color: Colors.textSecondary,
   },
 });
