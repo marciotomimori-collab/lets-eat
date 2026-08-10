@@ -1,8 +1,16 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+} from 'react-native';
 import { useRouter, Link } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Typography, Spacing, BorderRadius } from '../../constants/theme';
 import Button from '../../components/ui/Button';
@@ -13,8 +21,8 @@ const { width, height } = Dimensions.get('window');
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { t } = useTranslation();
   const { setUser } = useAuthStore();
+  const [showOptions, setShowOptions] = useState(false);
 
   const handleGuestLogin = () => {
     const mockGuestUser = {
@@ -23,135 +31,309 @@ export default function WelcomeScreen() {
       email: null,
       displayName: null,
     } as unknown as User;
-    
+
     setUser(mockGuestUser);
     router.replace('/(auth)/onboarding');
   };
 
   const handleGoogleLogin = () => {
-    // Mock google login
     const mockGoogleUser = {
       uid: 'google-user-123',
       isAnonymous: false,
       email: 'user@google.com',
       displayName: 'Google User',
     } as unknown as User;
-    
+
     setUser(mockGoogleUser);
     router.replace('/(auth)/onboarding');
   };
 
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={[Colors.primary, Colors.primaryDark]}
-        style={styles.topHalf}
-      >
-        <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>Let's Eat 🍴</Text>
-          <Text style={styles.subtitle}>
-            {t('welcome.subtitle', 'Descubra. Avalie. Viva experiências incríveis.')}
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#D32F2F" />
+
+      {!showOptions ? (
+        // ─── STEP 1: Hero Splash View (Exact Match to Image) ───
+        <TouchableOpacity
+          activeOpacity={0.95}
+          onPress={() => setShowOptions(true)}
+          style={styles.heroContainer}
+        >
+          {/* Background Red Container */}
+          <View style={styles.redBackground}>
+            {/* Watermark Food Icons (Decorative) */}
+            <View style={styles.watermarkContainer} pointerEvents="none">
+              <Text style={[styles.watermarkIcon, { top: '10%', left: '10%' }]}>🍕</Text>
+              <Text style={[styles.watermarkIcon, { top: '15%', right: '12%' }]}>🍔</Text>
+              <Text style={[styles.watermarkIcon, { top: '35%', left: '8%' }]}>🌮</Text>
+              <Text style={[styles.watermarkIcon, { top: '40%', right: '10%' }]}>🍣</Text>
+              <Text style={[styles.watermarkIcon, { top: '55%', left: '15%' }]}>🍩</Text>
+            </View>
+
+            {/* Main Brand Logo & Tagline */}
+            <View style={styles.brandContent}>
+              <View style={styles.titleWrapper}>
+                <Text style={styles.titleLet}>Let's</Text>
+                <View style={styles.eatRow}>
+                  <Text style={styles.titleEat}>Eat</Text>
+                  <Text style={styles.titleFork}>🍴</Text>
+                </View>
+              </View>
+
+              <Text style={styles.taglineLine1}>Descubra. Avalie.</Text>
+              <Text style={styles.taglineLine2}>Viva experiências incríveis.</Text>
+            </View>
+          </View>
+
+          {/* Bottom Curved Wave Container */}
+          <View style={styles.bottomCurveContainer}>
+            {/* Smooth White Wave */}
+            <View style={styles.whiteCurveShape} />
+
+            {/* Hero Pasta Dish Image */}
+            <View style={styles.plateWrapper}>
+              <Image
+                source={require('../../assets/images/hero_pasta_dish.jpg')}
+                style={styles.plateImage}
+                resizeMode="cover"
+              />
+            </View>
+
+            {/* Tap Hint */}
+            <View style={styles.tapPrompt}>
+              <Text style={styles.tapPromptText}>Toque para continuar</Text>
+              <Ionicons name="chevron-forward" size={16} color={Colors.primary} />
+            </View>
+          </View>
+        </TouchableOpacity>
+      ) : (
+        // ─── STEP 2: Login Options View ───
+        <View style={styles.optionsContainer}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => setShowOptions(false)}
+          >
+            <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          </TouchableOpacity>
+
+          <View style={styles.optionsHeader}>
+            <Text style={styles.optionsTitle}>Como você deseja</Text>
+            <Text style={styles.optionsTitleRed}>continuar?</Text>
+          </View>
+
+          <View style={styles.buttonStack}>
+            <Button
+              title="Criar uma conta com e-mail"
+              onPress={() => router.push('/(auth)/register')}
+              variant="primary"
+              fullWidth
+              style={styles.optionBtn}
+            />
+
+            <Button
+              title="Conectar com Google"
+              onPress={handleGoogleLogin}
+              variant="outline"
+              icon="logo-google"
+              fullWidth
+              style={styles.optionBtn}
+            />
+
+            <Button
+              title="Entrar como convidado sem cadastro"
+              onPress={handleGuestLogin}
+              variant="ghost"
+              fullWidth
+              style={styles.optionBtn}
+            />
+          </View>
+
+          <Text style={styles.footerText}>
+            Ao continuar, você concorda com os{' '}
+            <Link href="/privacy-policy" asChild>
+              <TouchableOpacity>
+                <Text style={styles.linkText}>
+                  Termos de Uso e Política de Privacidade
+                </Text>
+              </TouchableOpacity>
+            </Link>
           </Text>
         </View>
-      </LinearGradient>
-
-      <View style={styles.bottomHalf}>
-        <Text style={styles.heading}>
-          {t('welcome.heading', 'Como você deseja continuar?')}
-        </Text>
-
-        <View style={styles.buttonContainer}>
-          <Button
-            title={t('welcome.email_btn', 'Criar uma conta com e-mail')}
-            onPress={() => router.push('/(auth)/register')}
-            variant="primary"
-            fullWidth
-            style={styles.button}
-          />
-          
-          <Button
-            title={t('welcome.google_btn', 'Conectar com Google')}
-            onPress={handleGoogleLogin}
-            variant="outline"
-            icon="logo-google"
-            fullWidth
-            style={styles.button}
-          />
-
-          <Button
-            title={t('welcome.guest_btn', 'Entrar como convidado sem cadastro')}
-            onPress={handleGuestLogin}
-            variant="ghost"
-            fullWidth
-            style={styles.button}
-          />
-        </View>
-
-        <Text style={styles.footerText}>
-          {t('welcome.terms', 'Ao continuar, você concorda com os ')}
-          <Link href="/privacy-policy" asChild>
-            <TouchableOpacity>
-              <Text style={styles.linkText}>{t('welcome.terms_link', 'Termos de Uso e Política de Privacidade')}</Text>
-            </TouchableOpacity>
-          </Link>
-        </Text>
-      </View>
-    </View>
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#D32F2F',
   },
-  topHalf: {
-    height: height * 0.45,
-    justifyContent: 'center',
+
+  // ─── STEP 1: HERO SPLASH STYLES ───
+  heroContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    backgroundColor: '#D32F2F',
+  },
+  redBackground: {
+    flex: 1,
+    paddingTop: height * 0.08,
     alignItems: 'center',
-    borderBottomLeftRadius: BorderRadius.xl,
-    borderBottomRightRadius: BorderRadius.xl,
+    justifyContent: 'flex-start',
   },
-  logoContainer: {
+  watermarkContainer: {
+    ...StyleSheet.absoluteFill,
+    opacity: 0.12,
+  },
+  watermarkIcon: {
+    position: 'absolute',
+    fontSize: 48,
+  },
+  brandContent: {
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
   },
-  logoText: {
-    ...Typography.h1,
-    color: Colors.white,
-    fontSize: 42,
+  titleWrapper: {
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+  },
+  titleLet: {
+    fontSize: 58,
+    fontFamily: Typography.fontFamily.bold,
+    color: '#FFFFFF',
+    lineHeight: 64,
+    textAlign: 'center',
+  },
+  eatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  titleEat: {
+    fontSize: 58,
+    fontFamily: Typography.fontFamily.bold,
+    color: '#FFFFFF',
+    lineHeight: 64,
+  },
+  titleFork: {
+    fontSize: 46,
+    marginLeft: 6,
+    lineHeight: 54,
+  },
+  taglineLine1: {
+    fontSize: 20,
+    fontFamily: Typography.fontFamily.medium,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginTop: Spacing.sm,
+  },
+  taglineLine2: {
+    fontSize: 20,
+    fontFamily: Typography.fontFamily.medium,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginTop: 2,
+    opacity: 0.95,
+  },
+
+  // Bottom Wave & Dish
+  bottomCurveContainer: {
+    height: height * 0.38,
+    width: width,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    position: 'relative',
+    backgroundColor: 'transparent',
+  },
+  whiteCurveShape: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: height * 0.30,
+    backgroundColor: '#FAFAFA',
+    borderTopLeftRadius: width * 0.5,
+    borderTopRightRadius: width * 0.5,
+    transform: [{ scaleX: 1.4 }],
+  },
+  plateWrapper: {
+    width: width * 0.72,
+    height: width * 0.72,
+    borderRadius: (width * 0.72) / 2,
+    overflow: 'hidden',
+    marginBottom: Spacing.lg,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+  },
+  plateImage: {
+    width: '100%',
+    height: '100%',
+  },
+  tapPrompt: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: Spacing.md,
-    textAlign: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.full,
   },
-  subtitle: {
-    ...Typography.body1,
-    color: Colors.white,
-    textAlign: 'center',
-    opacity: 0.9,
+  tapPromptText: {
+    ...Typography.body2,
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.semiBold,
+    marginRight: 4,
   },
-  bottomHalf: {
+
+  // ─── STEP 2: OPTIONS VIEW STYLES ───
+  optionsContainer: {
     flex: 1,
+    backgroundColor: '#FAFAFA',
     padding: Spacing.xl,
     justifyContent: 'space-between',
-    paddingTop: Spacing.xxl,
   },
-  heading: {
-    ...Typography.h3,
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.lightGray,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md,
+  },
+  optionsHeader: {
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.xxl,
+  },
+  optionsTitle: {
+    fontSize: 28,
+    fontFamily: Typography.fontFamily.bold,
     color: Colors.text,
-    textAlign: 'center',
-    marginBottom: Spacing.xl,
   },
-  buttonContainer: {
+  optionsTitleRed: {
+    fontSize: 28,
+    fontFamily: Typography.fontFamily.bold,
+    color: Colors.primary,
+  },
+  buttonStack: {
+    flex: 1,
+    justifyContent: 'center',
     gap: Spacing.md,
   },
-  button: {
+  optionBtn: {
     marginBottom: Spacing.sm,
   },
   footerText: {
     ...Typography.caption,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginTop: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   linkText: {
     ...Typography.caption,
