@@ -4,12 +4,12 @@ import {
   Text,
   StyleSheet,
   Dimensions,
-  Image,
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
+import Svg, { Path, Circle, Line, G } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Typography, Spacing, BorderRadius } from '../../constants/theme';
@@ -18,6 +18,86 @@ import { useAuthStore } from '../../stores/authStore';
 import { User } from 'firebase/auth';
 
 const { width, height } = Dimensions.get('window');
+
+// ─── 1. MINIMALIST INLINE SVG FORK ICON ───
+const MinimalistForkIcon = ({ color = '#FFFFFF', size = 36 }) => (
+  <Svg width={size} height={size * 1.15} viewBox="0 0 32 38" fill="none">
+    {/* 3 Tines */}
+    <Path d="M8 3V13M16 3V13M24 3V13" stroke={color} strokeWidth="3.2" strokeLinecap="round" />
+    {/* Curved Head */}
+    <Path d="M8 13C8 17.4183 11.5817 21 16 21C20.4183 21 24 17.4183 24 13" stroke={color} strokeWidth="3.2" strokeLinecap="round" />
+    {/* Handle */}
+    <Path d="M16 21V35" stroke={color} strokeWidth="3.8" strokeLinecap="round" />
+  </Svg>
+);
+
+// ─── 2. ORGANIC WAVE TRANSITION SVG ───
+const OrganicWaveTransition = ({ width: waveWidth, height: waveHeight = 90 }: { width: number; height?: number }) => (
+  <Svg width={waveWidth} height={waveHeight} viewBox={`0 0 ${waveWidth} ${waveHeight}`} style={styles.waveSvg}>
+    <Path
+      d={`M 0,15 C ${waveWidth * 0.3},85 ${waveWidth * 0.7},-25 ${waveWidth},45 L ${waveWidth},${waveHeight} L 0,${waveHeight} Z`}
+      fill="#FAFAFA"
+    />
+  </Svg>
+);
+
+// ─── 3. ABSTRACT GEOMETRIC ARTWORK (CONCENTRIC PASTEL CIRCLES & GEAR/PLATE LINES) ───
+const AbstractCulinaryArt = ({ size = 260 }: { size?: number }) => {
+  const center = size / 2;
+  return (
+    <View style={[styles.abstractArtContainer, { width: size, height: size }]}>
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <G>
+          {/* Outer Soft Pastel Circle (Beige / Warm Gray) */}
+          <Circle cx={center} cy={center} r={size * 0.48} fill="#F4F1EA" />
+          
+          {/* Overlapping Pastel Yellow-Orange Accent Circle */}
+          <Circle cx={center - size * 0.1} cy={center + size * 0.05} r={size * 0.38} fill="#FFF9EB" opacity={0.9} />
+          
+          {/* Middle Pastel Circle */}
+          <Circle cx={center} cy={center} r={size * 0.34} fill="#EBE6DC" />
+          
+          {/* Minimalist Thin Outer Plate Rim */}
+          <Circle cx={center} cy={center} r={size * 0.44} stroke="#D4CFC5" strokeWidth="1.2" strokeDasharray="6,4" fill="none" />
+          
+          {/* Inner Plate Rim Circle */}
+          <Circle cx={center} cy={center} r={size * 0.25} fill="#FBF9F5" stroke="#C8C2B5" strokeWidth="1.5" />
+          
+          {/* Center Focal Circle (Soft Cream) */}
+          <Circle cx={center} cy={center} r={size * 0.14} fill="#E6DFD3" />
+          
+          {/* Conceptual Gear / Culinary Radial Ticks */}
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, index) => {
+            const rad = (angle * Math.PI) / 180;
+            const rInner = size * 0.28;
+            const rOuter = size * 0.32;
+            const x1 = center + rInner * Math.cos(rad);
+            const y1 = center + rInner * Math.sin(rad);
+            const x2 = center + rOuter * Math.cos(rad);
+            const y2 = center + rOuter * Math.sin(rad);
+            return (
+              <Line
+                key={index}
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke="#B8B0A0"
+                strokeWidth={index % 3 === 0 ? "2" : "1"}
+                strokeLinecap="round"
+                opacity={0.8}
+              />
+            );
+          })}
+
+          {/* Abstract Geometric Lines (Crossing Tangents) */}
+          <Line x1={center - size * 0.35} y1={center - size * 0.2} x2={center + size * 0.35} y2={center + size * 0.2} stroke="#D6CFBF" strokeWidth="1" opacity={0.6} />
+          <Line x1={center - size * 0.2} y1={center + size * 0.35} x2={center + size * 0.2} y2={center - size * 0.35} stroke="#D6CFBF" strokeWidth="1" opacity={0.6} />
+        </G>
+      </Svg>
+    </View>
+  );
+};
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -53,53 +133,38 @@ export default function WelcomeScreen() {
       <StatusBar barStyle="light-content" backgroundColor="#D32F2F" />
 
       {!showOptions ? (
-        // ─── STEP 1: Hero Splash View (Exact Match to Image) ───
+        // ─── STEP 1: Abstract Geometric Hero Splash Screen ───
         <TouchableOpacity
-          activeOpacity={0.95}
+          activeOpacity={0.96}
           onPress={() => setShowOptions(true)}
           style={styles.heroContainer}
         >
-          {/* Background Red Container */}
-          <View style={styles.redBackground}>
-            {/* Watermark Food Icons (Decorative) */}
-            <View style={styles.watermarkContainer} pointerEvents="none">
-              <Text style={[styles.watermarkIcon, { top: '10%', left: '10%' }]}>🍕</Text>
-              <Text style={[styles.watermarkIcon, { top: '15%', right: '12%' }]}>🍔</Text>
-              <Text style={[styles.watermarkIcon, { top: '35%', left: '8%' }]}>🌮</Text>
-              <Text style={[styles.watermarkIcon, { top: '40%', right: '10%' }]}>🍣</Text>
-              <Text style={[styles.watermarkIcon, { top: '55%', left: '15%' }]}>🍩</Text>
-            </View>
-
-            {/* Main Brand Logo & Tagline */}
+          {/* Top Solid Red Background */}
+          <View style={styles.redHeaderArea}>
             <View style={styles.brandContent}>
               <View style={styles.titleWrapper}>
                 <Text style={styles.titleLet}>Let's</Text>
                 <View style={styles.eatRow}>
                   <Text style={styles.titleEat}>Eat</Text>
-                  <Text style={styles.titleFork}>🍴</Text>
+                  <View style={styles.forkContainer}>
+                    <MinimalistForkIcon color="#FFFFFF" size={38} />
+                  </View>
                 </View>
               </View>
 
-              <Text style={styles.taglineLine1}>Descubra. Avalie.</Text>
-              <Text style={styles.taglineLine2}>Viva experiências incríveis.</Text>
+              <Text style={styles.subtitleText}>Descubra. Avalie.</Text>
+              <Text style={styles.subtitleText}>Viva experiências incríveis.</Text>
             </View>
           </View>
 
-          {/* Bottom Curved Wave Container */}
-          <View style={styles.bottomCurveContainer}>
-            {/* Smooth White Wave */}
-            <View style={styles.whiteCurveShape} />
+          {/* Organic Wave Line Transition (Code Generated SVG) */}
+          <OrganicWaveTransition width={width} height={80} />
 
-            {/* Hero Pasta Dish Image */}
-            <View style={styles.plateWrapper}>
-              <Image
-                source={require('../../assets/images/hero_pasta_dish.jpg')}
-                style={styles.plateImage}
-                resizeMode="cover"
-              />
-            </View>
+          {/* Bottom Pure White Area with Abstract Geometric Composition */}
+          <View style={styles.whiteBottomArea}>
+            <AbstractCulinaryArt size={Math.min(width * 0.68, height * 0.32)} />
 
-            {/* Tap Hint */}
+            {/* Tap Prompt Hint */}
             <View style={styles.tapPrompt}>
               <Text style={styles.tapPromptText}>Toque para continuar</Text>
               <Ionicons name="chevron-forward" size={16} color={Colors.primary} />
@@ -107,7 +172,7 @@ export default function WelcomeScreen() {
           </View>
         </TouchableOpacity>
       ) : (
-        // ─── STEP 2: Login Options View ───
+        // ─── STEP 2: Login Options Screen ───
         <View style={styles.optionsContainer}>
           <TouchableOpacity
             style={styles.backButton}
@@ -173,22 +238,14 @@ const styles = StyleSheet.create({
   // ─── STEP 1: HERO SPLASH STYLES ───
   heroContainer: {
     flex: 1,
-    justifyContent: 'space-between',
+    backgroundColor: '#FAFAFA',
+  },
+  redHeaderArea: {
     backgroundColor: '#D32F2F',
-  },
-  redBackground: {
-    flex: 1,
     paddingTop: height * 0.08,
+    paddingBottom: Spacing.xl,
     alignItems: 'center',
-    justifyContent: 'flex-start',
-  },
-  watermarkContainer: {
-    ...StyleSheet.absoluteFill,
-    opacity: 0.12,
-  },
-  watermarkIcon: {
-    position: 'absolute',
-    fontSize: 48,
+    justifyContent: 'center',
   },
   brandContent: {
     alignItems: 'center',
@@ -199,11 +256,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   titleLet: {
-    fontSize: 58,
+    fontSize: 60,
     fontFamily: Typography.fontFamily.bold,
     color: '#FFFFFF',
-    lineHeight: 64,
+    lineHeight: 66,
     textAlign: 'center',
+    letterSpacing: -0.5,
   },
   eatRow: {
     flexDirection: 'row',
@@ -211,84 +269,64 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   titleEat: {
-    fontSize: 58,
+    fontSize: 60,
     fontFamily: Typography.fontFamily.bold,
     color: '#FFFFFF',
-    lineHeight: 64,
+    lineHeight: 66,
+    letterSpacing: -0.5,
   },
-  titleFork: {
-    fontSize: 46,
-    marginLeft: 6,
-    lineHeight: 54,
+  forkContainer: {
+    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  taglineLine1: {
-    fontSize: 20,
+  subtitleText: {
+    fontSize: 19,
     fontFamily: Typography.fontFamily.medium,
     color: '#FFFFFF',
     textAlign: 'center',
-    marginTop: Spacing.sm,
-  },
-  taglineLine2: {
-    fontSize: 20,
-    fontFamily: Typography.fontFamily.medium,
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginTop: 2,
-    opacity: 0.95,
+    lineHeight: 28,
+    opacity: 0.96,
   },
 
-  // Bottom Wave & Dish
-  bottomCurveContainer: {
-    height: height * 0.38,
-    width: width,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    position: 'relative',
-    backgroundColor: 'transparent',
+  // Wave SVG Style
+  waveSvg: {
+    backgroundColor: '#D32F2F',
   },
-  whiteCurveShape: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: height * 0.30,
+
+  // Bottom White Area & Abstract Art
+  whiteBottomArea: {
+    flex: 1,
     backgroundColor: '#FAFAFA',
-    borderTopLeftRadius: width * 0.5,
-    borderTopRightRadius: width * 0.5,
-    transform: [{ scaleX: 1.4 }],
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.xl,
   },
-  plateWrapper: {
-    width: width * 0.72,
-    height: width * 0.72,
-    borderRadius: (width * 0.72) / 2,
-    overflow: 'hidden',
-    marginBottom: Spacing.lg,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
-  },
-  plateImage: {
-    width: '100%',
-    height: '100%',
+  abstractArtContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md,
   },
   tapPrompt: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 6,
+    backgroundColor: Colors.white,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: '#EAE6DF',
   },
   tapPromptText: {
     ...Typography.body2,
     color: Colors.primary,
     fontFamily: Typography.fontFamily.semiBold,
-    marginRight: 4,
+    marginRight: 6,
   },
 
   // ─── STEP 2: OPTIONS VIEW STYLES ───
