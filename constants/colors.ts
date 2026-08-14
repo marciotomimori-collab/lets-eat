@@ -1,43 +1,54 @@
+// Design Tokens — iFood Design System Inspired
 export const Colors = {
-  primary: '#E53935',
-  primaryDark: '#C62828',
-  primaryLight: '#EF5350',
-  primarySoft: '#FFCDD2',
-  primaryGhost: '#FFEBEE',
+  // Primary — iFood Red
+  primary: '#EA1D2C',
+  primaryDark: '#C8101E',
+  primaryLight: '#FF3B4A',
+  primarySoft: '#FFD4D8',
+  primaryGhost: '#FFF0F1',
 
+  // Neutrals
   white: '#FFFFFF',
-  background: '#FAFAFA',
+  background: '#F2F2F2',
   surface: '#FFFFFF',
 
-  text: '#1A1A2E',
-  textSecondary: '#6B7280',
-  textLight: '#9CA3AF',
+  // Text
+  text: '#2B2B2B',
+  textSecondary: '#717171',
+  textLight: '#A0A0A0',
   textOnPrimary: '#FFFFFF',
 
-  border: '#E5E7EB',
-  borderLight: '#F3F4F6',
-  divider: '#F0F0F0',
+  // Borders
+  border: '#E0E0E0',
+  borderLight: '#F0F0F0',
+  divider: '#EBEBEB',
 
-  lightGray: '#F3F4F6',
-  lightRed: '#FFEBEE',
+  // Grays
+  lightGray: '#F2F2F2',
+  lightRed: '#FFF0F1',
 
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
+  // Status
+  success: '#50A773',
+  warning: '#FFBA00',
+  error: '#EA1D2C',
+  info: '#0070E0',
 
-  star: '#FBBF24',
-  starEmpty: '#D1D5DB',
+  // Stars
+  star: '#FFBA00',
+  starEmpty: '#D4D4D4',
 
+  // Brands
   google: '#4285F4',
 
+  // Overlay & Shadow
   overlay: 'rgba(0, 0, 0, 0.5)',
-  shadow: 'rgba(0, 0, 0, 0.08)',
+  shadow: 'rgba(0, 0, 0, 0.04)',
 
+  // Price Levels
   price: {
-    inexpensive: '#10B981',
-    moderate: '#F59E0B',
-    expensive: '#EF4444',
+    inexpensive: '#50A773',
+    moderate: '#FFBA00',
+    expensive: '#EA1D2C',
     veryExpensive: '#7C3AED',
   },
 };

@@ -10,6 +10,7 @@ import {
   ViewStyle, 
   TextStyle 
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Colors from '../../constants/colors';
 import { BorderRadius, Spacing, Typography } from '../../constants/theme';
 
@@ -21,7 +22,7 @@ export interface ButtonProps {
   variant?: ButtonVariant;
   disabled?: boolean;
   loading?: boolean;
-  icon?: React.ReactNode;
+  icon?: string | React.ReactNode;
   fullWidth?: boolean;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
@@ -109,7 +110,19 @@ export default function Button({
             />
           ) : (
             <>
-              {icon && <View style={styles.iconContainer}>{icon}</View>}
+              {icon && (
+                <View style={styles.iconContainer}>
+                  {typeof icon === 'string' ? (
+                    <Ionicons
+                      name={icon as keyof typeof Ionicons.glyphMap}
+                      size={20}
+                      color={variant === 'primary' || variant === 'google' ? Colors.white : Colors.primary}
+                    />
+                  ) : (
+                    icon
+                  )}
+                </View>
+              )}
               <Text style={[styles.text, getTextStyle(), disabled && styles.disabledText, textStyle]}>
                 {title}
               </Text>

@@ -1,119 +1,196 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, SafeAreaView, Animated } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Animated,
+  Easing,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  Dimensions,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius, Typography, Shadows } from '../../constants/theme';
-import { useAuthStore } from '../../stores/authStore';
+import { Typography, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import { useUserStore } from '../../stores/userStore';
+
+const { width } = Dimensions.get('window');
+
+// ─── Mock restaurant data for the roulette ───
+const RESTAURANTS = [
+  { name: 'Burger House', category: 'Hambúrguer', rating: 4.8 },
+  { name: 'Pizzaria Bella', category: 'Pizzaria', rating: 4.5 },
+  { name: 'Sushi Master', category: 'Japonesa', rating: 4.9 },
+  { name: 'Taco Loco', category: 'Mexicana', rating: 4.3 },
+  { name: 'Pastel do Zé', category: 'Pastelaria', rating: 4.6 },
+  { name: 'Cantina Italiana', category: 'Italiana', rating: 4.7 },
+];
+
+// ─── Mock achievement badges ───
+const BADGES = [
+  { id: '1', title: 'Explorador', icon: 'compass', subtitle: 'Sorteou 5 vezes', unlocked: true },
+  { id: '2', title: 'Crítico', icon: 'star', subtitle: 'Deixou 10 reviews', unlocked: true },
+  { id: '3', title: 'Sem Fome', icon: 'fast-food', subtitle: 'Pediu 3 burgers', unlocked: false },
+  { id: '4', title: 'Notívago', icon: 'moon', subtitle: 'Pedidos na madrugada', unlocked: false },
+];
+
+// ─── Mock reviews ───
+const REVIEWS = [
+  { id: '1', user: 'Matheus S.', comment: 'O algoritmo acertou em cheio! O hambúrguer estava incrível.', rating: 5 },
+  { id: '2', user: 'Ana Clara', comment: 'Usei a roleta e descobri uma pizzaria maravilhosa perto de casa.', rating: 4 },
+  { id: '3', user: 'Rafael L.', comment: 'Ótima experiência! Fui surpreendido com um restaurante japonês sensacional.', rating: 5 },
+];
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { t } = useTranslation();
-  const [modalVisible, setModalVisible] = useState(false);
-  const scaleAnim = React.useRef(new Animated.Value(1)).current;
-
-  const { user } = useAuthStore();
   const { profile } = useUserStore();
-  const userName = profile?.displayName || user?.email?.split('@')[0] || 'Visitante';
+  const rotationAnim = useRef(new Animated.Value(0)).current;
+  const [selectedRestaurant, setSelectedRestaurant] = useState('Para onde vamos hoje?');
+  const [isSpinning, setIsSpinning] = useState(false);
 
-  const handlePressIn = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 0.9,
-      useNativeDriver: true,
-    }).start();
-  };
+  const spinRoulette = () => {
+    if (isSpinning) return;
 
-  const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
+    setIsSpinning(true);
+    setSelectedRestaurant('Sorteando...');
+
+    rotationAnim.setValue(0);
+    Animated.timing(rotationAnim, {
       toValue: 1,
-      friction: 3,
-      tension: 40,
+      duration: 2500,
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
-    }).start();
+    }).start(() => {
+      const randomIndex = Math.floor(Math.random() * RESTAURANTS.length);
+      const selected = RESTAURANTS[randomIndex];
+      setSelectedRestaurant(`${selected.name} · ${selected.category}`);
+      setIsSpinning(false);
+    });
   };
 
-  const handleEatPress = () => {
-    setModalVisible(true);
-  };
+  const rotateInterpolate = rotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '1440deg'],
+  });
 
-  const navigateToSearch = () => {
-    setModalVisible(false);
-    router.push('/search-form' as any);
-  };
-
-  const navigateToSurprise = () => {
-    setModalVisible(false);
-    router.push('/surprise' as any);
+  const renderStars = (rating: number) => {
+    return (
+      <View style={styles.starsRow}>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Ionicons
+            key={i}
+            name={i <= rating ? 'star' : 'star-outline'}
+            size={14}
+            color={i <= rating ? Colors.star : Colors.starEmpty}
+          />
+        ))}
+      </View>
+    );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header Section */}
-        <View style={styles.header}>
-          <Text style={styles.greeting}>
-            Olá, {userName}! 👋
-          </Text>
-          <Text style={styles.subheading}>
-            Pronto para descobrir novos sabores?
-          </Text>
-        </View>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* AppBar */}
+      <View style={styles.appBar}>
+        <Text style={styles.appBarTitle}>Let's Eat</Text>
+        <Ionicons name="restaurant" size={22} color={Colors.primary} />
+      </View>
 
-        {/* Main Action Button */}
-        <View style={styles.mainActionContainer}>
-          <TouchableOpacity
-            activeOpacity={1}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            onPress={handleEatPress}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ═══════════ ROULETTE SECTION ═══════════ */}
+        <Text style={styles.sectionTitle}>Está indeciso?</Text>
+
+        <View style={styles.card}>
+          {/* Spinning Dice Circle */}
+          <Animated.View
+            style={[
+              styles.diceCircle,
+              { transform: [{ rotate: rotateInterpolate }] },
+            ]}
           >
-            <Animated.View style={[styles.mainButton, { transform: [{ scale: scaleAnim }] }]}>
-              <Text style={styles.mainButtonText}>Vamos comer?</Text>
-            </Animated.View>
+            <Image
+              source={require('../../assets/images/dice_icon.jpg')}
+              style={styles.diceImage}
+              resizeMode="cover"
+            />
+          </Animated.View>
+
+          {/* Selected Restaurant Name */}
+          <Text style={styles.selectedRestaurant}>{selectedRestaurant}</Text>
+
+          {/* Spin Button */}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={spinRoulette}
+            disabled={isSpinning}
+            style={[styles.spinButton, isSpinning && styles.spinButtonDisabled]}
+          >
+            <Text style={styles.spinButtonText}>
+              {isSpinning ? 'Girando...' : 'Sortear Restaurante'}
+            </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
 
-      {/* Bottom Sheet Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setModalVisible(false)}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Como você quer escolher hoje?</Text>
-            
-            <TouchableOpacity style={styles.modalCard} onPress={navigateToSearch}>
-              <View style={styles.modalCardLeft}>
-                <View style={styles.letterCircle}>
-                  <Text style={styles.letterText}>A</Text>
-                </View>
-                <Text style={styles.modalCardIcon}>🔍</Text>
-              </View>
-              <View style={styles.modalCardBody}>
-                <Text style={styles.modalCardTitle}>Formulário rápido</Text>
-                <Text style={styles.modalCardSubtitle}>Encontre o lugar ideal</Text>
-              </View>
-            </TouchableOpacity>
+        {/* ═══════════ ACHIEVEMENTS SECTION ═══════════ */}
+        <Text style={styles.sectionTitle}>Suas Conquistas</Text>
 
-            <TouchableOpacity style={styles.modalCard} onPress={navigateToSurprise}>
-              <View style={styles.modalCardLeft}>
-                <View style={styles.letterCircle}>
-                  <Text style={styles.letterText}>B</Text>
-                </View>
-                <Text style={styles.modalCardIcon}>🎲</Text>
+        <FlatList
+          data={BADGES}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.badgesList}
+          renderItem={({ item }) => (
+            <View style={[styles.badgeCard, !item.unlocked && styles.badgeCardLocked]}>
+              <View style={[styles.badgeIconCircle, !item.unlocked && styles.badgeIconLocked]}>
+                <Ionicons
+                  name={item.icon as keyof typeof Ionicons.glyphMap}
+                  size={24}
+                  color={item.unlocked ? Colors.primary : Colors.textLight}
+                />
               </View>
-              <View style={styles.modalCardBody}>
-                <Text style={styles.modalCardTitle}>Quero ser surpreendido</Text>
-                <Text style={styles.modalCardSubtitle}>Deixe a sorte escolher!</Text>
+              <Text style={[styles.badgeTitle, !item.unlocked && styles.badgeTitleLocked]} numberOfLines={1}>
+                {item.title}
+              </Text>
+              <Text style={styles.badgeSubtitle} numberOfLines={1}>
+                {item.subtitle}
+              </Text>
+            </View>
+          )}
+        />
+
+        {/* ═══════════ REVIEWS SECTION ═══════════ */}
+        <Text style={styles.sectionTitle}>Avaliações da Galera</Text>
+
+        {REVIEWS.map((review) => (
+          <View key={review.id} style={styles.reviewCard}>
+            <View style={styles.reviewHeader}>
+              {/* User Avatar */}
+              <View style={styles.userAvatar}>
+                <Text style={styles.userAvatarText}>
+                  {review.user.charAt(0).toUpperCase()}
+                </Text>
               </View>
-            </TouchableOpacity>
+              <View style={styles.reviewHeaderInfo}>
+                <Text style={styles.reviewUser}>{review.user}</Text>
+                {renderStars(review.rating)}
+              </View>
+            </View>
+            <Text style={styles.reviewComment}>{review.comment}</Text>
           </View>
-        </TouchableOpacity>
-      </Modal>
+        ))}
+
+        {/* Bottom spacing */}
+        <View style={{ height: 24 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -123,106 +200,198 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+
+  // ─── AppBar ───
+  appBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.white,
+    paddingVertical: 14,
+    paddingHorizontal: Spacing.lg,
+    gap: 8,
+    borderBottomWidth: 0,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  appBarTitle: {
+    fontSize: 22,
+    fontFamily: Typography.fontFamily.bold,
+    color: Colors.primary,
+    letterSpacing: -0.3,
+  },
+
+  // ─── Scroll ───
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
-    flexGrow: 1,
-    paddingBottom: Spacing.xl,
-  },
-  header: {
-    padding: Spacing.xl,
-    paddingTop: Spacing.xxl,
-  },
-  greeting: {
-    ...Typography.h2,
-    color: Colors.text,
-  },
-  subheading: {
-    ...Typography.h4,
-    color: Colors.textSecondary,
-    marginTop: Spacing.sm,
-  },
-  mainActionContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: Spacing.xxl,
-  },
-  mainButton: {
-    backgroundColor: Colors.primary,
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadows.lg,
-    elevation: 12,
-  },
-  mainButtonText: {
-    ...Typography.h2,
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    padding: Spacing.xl,
-    paddingBottom: Spacing.xxl,
-  },
-  modalTitle: {
-    ...Typography.h3,
-    color: Colors.text,
-    marginBottom: Spacing.xl,
-    textAlign: 'center',
-  },
-  modalCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
     padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    ...Shadows.sm,
   },
-  modalCardLeft: {
+
+  // ─── Section Titles ───
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: Typography.fontFamily.bold,
+    color: Colors.text,
+    marginBottom: Spacing.md,
+    marginTop: Spacing.lg,
+  },
+
+  // ─── Card (White elevated container) ───
+  card: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xxl,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+
+  // ─── Dice / Roulette ───
+  diceCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 5,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.white,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xl,
+  },
+  diceImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+  },
+  selectedRestaurant: {
+    fontSize: 18,
+    fontFamily: Typography.fontFamily.semiBold,
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+  },
+  spinButton: {
+    width: '100%',
+    height: 50,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  spinButtonDisabled: {
+    opacity: 0.7,
+  },
+  spinButtonText: {
+    fontSize: 16,
+    fontFamily: Typography.fontFamily.bold,
+    color: Colors.white,
+  },
+
+  // ─── Badges / Achievements ───
+  badgesList: {
+    paddingBottom: Spacing.sm,
+  },
+  badgeCard: {
+    width: 130,
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    marginRight: Spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  badgeCardLocked: {
+    opacity: 0.4,
+  },
+  badgeIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primaryGhost,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm,
+  },
+  badgeIconLocked: {
+    backgroundColor: Colors.lightGray,
+  },
+  badgeTitle: {
+    fontSize: 13,
+    fontFamily: Typography.fontFamily.bold,
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  badgeTitleLocked: {
+    color: Colors.textLight,
+  },
+  badgeSubtitle: {
+    fontSize: 10,
+    fontFamily: Typography.fontFamily.regular,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+
+  // ─── Reviews ───
+  reviewCard: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  reviewHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  userAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: Spacing.md,
   },
-  letterCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.sm,
+  userAvatarText: {
+    fontSize: 15,
+    fontFamily: Typography.fontFamily.bold,
+    color: Colors.white,
   },
-  letterText: {
-    color: Colors.primaryDark,
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  modalCardIcon: {
-    fontSize: 28,
-  },
-  modalCardBody: {
+  reviewHeaderInfo: {
     flex: 1,
   },
-  modalCardTitle: {
-    ...Typography.h4,
+  reviewUser: {
+    fontSize: 14,
+    fontFamily: Typography.fontFamily.bold,
     color: Colors.text,
-    marginBottom: 2,
   },
-  modalCardSubtitle: {
-    ...Typography.body2,
+  starsRow: {
+    flexDirection: 'row',
+    gap: 2,
+    marginTop: 2,
+  },
+  reviewComment: {
+    fontSize: 13,
+    fontFamily: Typography.fontFamily.regular,
     color: Colors.textSecondary,
+    lineHeight: 19,
+    marginLeft: 48,
   },
 });

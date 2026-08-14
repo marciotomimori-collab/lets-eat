@@ -19,83 +19,43 @@ import { User } from 'firebase/auth';
 
 const { width, height } = Dimensions.get('window');
 
-// ─── 1. MINIMALIST INLINE SVG FORK ICON ───
-const MinimalistForkIcon = ({ color = '#FFFFFF', size = 36 }) => (
+// ─── Minimalist Fork SVG Icon ───
+const ForkIcon = ({ color = '#FFFFFF', size = 34 }: { color?: string; size?: number }) => (
   <Svg width={size} height={size * 1.15} viewBox="0 0 32 38" fill="none">
-    {/* 3 Tines */}
     <Path d="M8 3V13M16 3V13M24 3V13" stroke={color} strokeWidth="3.2" strokeLinecap="round" />
-    {/* Curved Head */}
     <Path d="M8 13C8 17.4183 11.5817 21 16 21C20.4183 21 24 17.4183 24 13" stroke={color} strokeWidth="3.2" strokeLinecap="round" />
-    {/* Handle */}
     <Path d="M16 21V35" stroke={color} strokeWidth="3.8" strokeLinecap="round" />
   </Svg>
 );
 
-// ─── 2. ORGANIC WAVE TRANSITION SVG ───
-const OrganicWaveTransition = ({ width: waveWidth, height: waveHeight = 90 }: { width: number; height?: number }) => (
-  <Svg width={waveWidth} height={waveHeight} viewBox={`0 0 ${waveWidth} ${waveHeight}`} style={styles.waveSvg}>
+// ─── Organic Wave SVG ───
+const WaveSvg = ({ w, h = 80 }: { w: number; h?: number }) => (
+  <Svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ backgroundColor: Colors.primary }}>
     <Path
-      d={`M 0,15 C ${waveWidth * 0.3},85 ${waveWidth * 0.7},-25 ${waveWidth},45 L ${waveWidth},${waveHeight} L 0,${waveHeight} Z`}
-      fill="#FAFAFA"
+      d={`M 0,18 C ${w * 0.3},75 ${w * 0.7},-20 ${w},42 L ${w},${h} L 0,${h} Z`}
+      fill={Colors.background}
     />
   </Svg>
 );
 
-// ─── 3. ABSTRACT GEOMETRIC ARTWORK (CONCENTRIC PASTEL CIRCLES & GEAR/PLATE LINES) ───
-const AbstractCulinaryArt = ({ size = 260 }: { size?: number }) => {
-  const center = size / 2;
+// ─── Abstract Geometric Plate Composition ───
+const PlateArt = ({ size = 240 }: { size?: number }) => {
+  const c = size / 2;
   return (
-    <View style={[styles.abstractArtContainer, { width: size, height: size }]}>
-      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <G>
-          {/* Outer Soft Pastel Circle (Beige / Warm Gray) */}
-          <Circle cx={center} cy={center} r={size * 0.48} fill="#F4F1EA" />
-          
-          {/* Overlapping Pastel Yellow-Orange Accent Circle */}
-          <Circle cx={center - size * 0.1} cy={center + size * 0.05} r={size * 0.38} fill="#FFF9EB" opacity={0.9} />
-          
-          {/* Middle Pastel Circle */}
-          <Circle cx={center} cy={center} r={size * 0.34} fill="#EBE6DC" />
-          
-          {/* Minimalist Thin Outer Plate Rim */}
-          <Circle cx={center} cy={center} r={size * 0.44} stroke="#D4CFC5" strokeWidth="1.2" strokeDasharray="6,4" fill="none" />
-          
-          {/* Inner Plate Rim Circle */}
-          <Circle cx={center} cy={center} r={size * 0.25} fill="#FBF9F5" stroke="#C8C2B5" strokeWidth="1.5" />
-          
-          {/* Center Focal Circle (Soft Cream) */}
-          <Circle cx={center} cy={center} r={size * 0.14} fill="#E6DFD3" />
-          
-          {/* Conceptual Gear / Culinary Radial Ticks */}
-          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, index) => {
-            const rad = (angle * Math.PI) / 180;
-            const rInner = size * 0.28;
-            const rOuter = size * 0.32;
-            const x1 = center + rInner * Math.cos(rad);
-            const y1 = center + rInner * Math.sin(rad);
-            const x2 = center + rOuter * Math.cos(rad);
-            const y2 = center + rOuter * Math.sin(rad);
-            return (
-              <Line
-                key={index}
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                stroke="#B8B0A0"
-                strokeWidth={index % 3 === 0 ? "2" : "1"}
-                strokeLinecap="round"
-                opacity={0.8}
-              />
-            );
-          })}
-
-          {/* Abstract Geometric Lines (Crossing Tangents) */}
-          <Line x1={center - size * 0.35} y1={center - size * 0.2} x2={center + size * 0.35} y2={center + size * 0.2} stroke="#D6CFBF" strokeWidth="1" opacity={0.6} />
-          <Line x1={center - size * 0.2} y1={center + size * 0.35} x2={center + size * 0.2} y2={center - size * 0.35} stroke="#D6CFBF" strokeWidth="1" opacity={0.6} />
-        </G>
-      </Svg>
-    </View>
+    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <Circle cx={c} cy={c} r={size * 0.47} fill="#EDEDED" />
+      <Circle cx={c} cy={c} r={size * 0.35} fill="#F5F5F5" />
+      <Circle cx={c} cy={c} r={size * 0.43} stroke="#DCDCDC" strokeWidth="1.2" strokeDasharray="6,4" fill="none" />
+      <Circle cx={c} cy={c} r={size * 0.24} fill="#FAFAFA" stroke="#D4D4D4" strokeWidth="1.5" />
+      <Circle cx={c} cy={c} r={size * 0.13} fill="#E8E8E8" />
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, i) => {
+        const rad = (angle * Math.PI) / 180;
+        const r1 = size * 0.27, r2 = size * 0.31;
+        return (
+          <Line key={i} x1={c + r1 * Math.cos(rad)} y1={c + r1 * Math.sin(rad)} x2={c + r2 * Math.cos(rad)} y2={c + r2 * Math.sin(rad)} stroke="#BFBFBF" strokeWidth={i % 3 === 0 ? '2' : '1'} strokeLinecap="round" opacity={0.7} />
+        );
+      })}
+    </Svg>
   );
 };
 
@@ -105,277 +65,126 @@ export default function WelcomeScreen() {
   const [showOptions, setShowOptions] = useState(false);
 
   const handleGuestLogin = () => {
-    const mockGuestUser = {
+    setUser({
       uid: 'guest-user-123',
       isAnonymous: true,
       email: null,
       displayName: null,
-    } as unknown as User;
-
-    setUser(mockGuestUser);
+    } as unknown as User);
     router.replace('/(auth)/onboarding');
   };
 
   const handleGoogleLogin = () => {
-    const mockGoogleUser = {
+    setUser({
       uid: 'google-user-123',
       isAnonymous: false,
       email: 'user@google.com',
       displayName: 'Google User',
-    } as unknown as User;
-
-    setUser(mockGoogleUser);
+    } as unknown as User);
     router.replace('/(auth)/onboarding');
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#D32F2F" />
-
-      {!showOptions ? (
-        // ─── STEP 1: Abstract Geometric Hero Splash Screen ───
-        <TouchableOpacity
-          activeOpacity={0.96}
-          onPress={() => setShowOptions(true)}
-          style={styles.heroContainer}
-        >
-          {/* Top Solid Red Background */}
-          <View style={styles.redHeaderArea}>
-            <View style={styles.brandContent}>
-              <View style={styles.titleWrapper}>
-                <Text style={styles.titleLet}>Let's</Text>
-                <View style={styles.eatRow}>
-                  <Text style={styles.titleEat}>Eat</Text>
-                  <View style={styles.forkContainer}>
-                    <MinimalistForkIcon color="#FFFFFF" size={38} />
-                  </View>
-                </View>
-              </View>
-
-              <Text style={styles.subtitleText}>Descubra. Avalie.</Text>
-              <Text style={styles.subtitleText}>Viva experiências incríveis.</Text>
-            </View>
-          </View>
-
-          {/* Organic Wave Line Transition (Code Generated SVG) */}
-          <OrganicWaveTransition width={width} height={80} />
-
-          {/* Bottom Pure White Area with Abstract Geometric Composition */}
-          <View style={styles.whiteBottomArea}>
-            <AbstractCulinaryArt size={Math.min(width * 0.68, height * 0.32)} />
-
-            {/* Tap Prompt Hint */}
-            <View style={styles.tapPrompt}>
-              <Text style={styles.tapPromptText}>Toque para continuar</Text>
-              <Ionicons name="chevron-forward" size={16} color={Colors.primary} />
-            </View>
-          </View>
-        </TouchableOpacity>
-      ) : (
-        // ─── STEP 2: Login Options Screen ───
-        <View style={styles.optionsContainer}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => setShowOptions(false)}
-          >
+  if (showOptions) {
+    return (
+      <SafeAreaView style={[styles.root, { backgroundColor: Colors.background }]}>
+        <StatusBar barStyle="dark-content" />
+        <View style={styles.optionsView}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => setShowOptions(false)}>
             <Ionicons name="arrow-back" size={24} color={Colors.text} />
           </TouchableOpacity>
 
-          <View style={styles.optionsHeader}>
-            <Text style={styles.optionsTitle}>Como você deseja</Text>
-            <Text style={styles.optionsTitleRed}>continuar?</Text>
+          <View style={styles.optionsHeaderBlock}>
+            <Text style={styles.optionsHeading}>Como você deseja</Text>
+            <Text style={styles.optionsHeadingRed}>continuar?</Text>
           </View>
 
-          <View style={styles.buttonStack}>
-            <Button
-              title="Criar uma conta com e-mail"
-              onPress={() => router.push('/(auth)/register')}
-              variant="primary"
-              fullWidth
-              style={styles.optionBtn}
-            />
-
-            <Button
-              title="Conectar com Google"
-              onPress={handleGoogleLogin}
-              variant="outline"
-              icon="logo-google"
-              fullWidth
-              style={styles.optionBtn}
-            />
-
-            <Button
-              title="Entrar como convidado sem cadastro"
-              onPress={handleGuestLogin}
-              variant="ghost"
-              fullWidth
-              style={styles.optionBtn}
-            />
+          <View style={styles.optionsBtns}>
+            <Button title="Criar uma conta com e-mail" onPress={() => router.push('/(auth)/register')} variant="primary" fullWidth icon="mail" />
+            <View style={{ height: Spacing.md }} />
+            <Button title="Conectar com Google" onPress={handleGoogleLogin} variant="outline" fullWidth icon="logo-google" />
+            <View style={{ height: Spacing.md }} />
+            <Button title="Entrar como convidado" onPress={handleGuestLogin} variant="ghost" fullWidth icon="person-outline" />
           </View>
 
-          <Text style={styles.footerText}>
+          <Text style={styles.termsText}>
             Ao continuar, você concorda com os{' '}
             <Link href="/privacy-policy" asChild>
               <TouchableOpacity>
-                <Text style={styles.linkText}>
-                  Termos de Uso e Política de Privacidade
-                </Text>
+                <Text style={styles.termsLink}>Termos de Uso e Política de Privacidade</Text>
               </TouchableOpacity>
             </Link>
           </Text>
         </View>
-      )}
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.root}>
+      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+      <TouchableOpacity activeOpacity={0.96} onPress={() => setShowOptions(true)} style={styles.hero}>
+        {/* Red Header */}
+        <View style={styles.redArea}>
+          <View style={styles.brand}>
+            <Text style={styles.logoLets}>Let's</Text>
+            <View style={styles.logoRow}>
+              <Text style={styles.logoEat}>Eat</Text>
+              <View style={{ marginLeft: 8 }}>
+                <ForkIcon color="#FFFFFF" size={36} />
+              </View>
+            </View>
+          </View>
+          <Text style={styles.tagline}>Descubra. Avalie.</Text>
+          <Text style={styles.tagline}>Viva experiências incríveis.</Text>
+        </View>
+
+        {/* Wave Transition */}
+        <WaveSvg w={width} h={80} />
+
+        {/* White Bottom with Abstract Art */}
+        <View style={styles.whiteArea}>
+          <PlateArt size={Math.min(width * 0.65, 260)} />
+          <View style={styles.tapHint}>
+            <Text style={styles.tapHintText}>Toque para continuar</Text>
+            <Ionicons name="chevron-forward" size={16} color={Colors.primary} />
+          </View>
+        </View>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#D32F2F',
+  root: { flex: 1, backgroundColor: Colors.primary },
+  hero: { flex: 1, backgroundColor: Colors.background },
+  redArea: {
+    backgroundColor: Colors.primary,
+    paddingTop: height * 0.07,
+    paddingBottom: Spacing.xxl,
+    alignItems: 'center',
   },
+  brand: { alignItems: 'center', marginBottom: Spacing.lg },
+  logoLets: { fontSize: 56, fontFamily: Typography.fontFamily.bold, color: '#FFF', lineHeight: 62 },
+  logoRow: { flexDirection: 'row', alignItems: 'center' },
+  logoEat: { fontSize: 56, fontFamily: Typography.fontFamily.bold, color: '#FFF', lineHeight: 62 },
+  tagline: { fontSize: 18, fontFamily: Typography.fontFamily.medium, color: '#FFF', textAlign: 'center', opacity: 0.95 },
+  whiteArea: { flex: 1, backgroundColor: Colors.background, alignItems: 'center', justifyContent: 'space-between', paddingVertical: Spacing.xl },
+  tapHint: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: Colors.white, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full, elevation: 2,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 4,
+    borderWidth: 1, borderColor: '#E8E8E8',
+  },
+  tapHintText: { ...Typography.body2, color: Colors.primary, fontFamily: Typography.fontFamily.semiBold, marginRight: 6 },
 
-  // ─── STEP 1: HERO SPLASH STYLES ───
-  heroContainer: {
-    flex: 1,
-    backgroundColor: '#FAFAFA',
-  },
-  redHeaderArea: {
-    backgroundColor: '#D32F2F',
-    paddingTop: height * 0.08,
-    paddingBottom: Spacing.xl,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  brandContent: {
-    alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
-  },
-  titleWrapper: {
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  titleLet: {
-    fontSize: 60,
-    fontFamily: Typography.fontFamily.bold,
-    color: '#FFFFFF',
-    lineHeight: 66,
-    textAlign: 'center',
-    letterSpacing: -0.5,
-  },
-  eatRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  titleEat: {
-    fontSize: 60,
-    fontFamily: Typography.fontFamily.bold,
-    color: '#FFFFFF',
-    lineHeight: 66,
-    letterSpacing: -0.5,
-  },
-  forkContainer: {
-    marginLeft: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  subtitleText: {
-    fontSize: 19,
-    fontFamily: Typography.fontFamily.medium,
-    color: '#FFFFFF',
-    textAlign: 'center',
-    lineHeight: 28,
-    opacity: 0.96,
-  },
-
-  // Wave SVG Style
-  waveSvg: {
-    backgroundColor: '#D32F2F',
-  },
-
-  // Bottom White Area & Abstract Art
-  whiteBottomArea: {
-    flex: 1,
-    backgroundColor: '#FAFAFA',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.xl,
-  },
-  abstractArtContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: Spacing.md,
-  },
-  tapPrompt: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.white,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    borderWidth: 1,
-    borderColor: '#EAE6DF',
-  },
-  tapPromptText: {
-    ...Typography.body2,
-    color: Colors.primary,
-    fontFamily: Typography.fontFamily.semiBold,
-    marginRight: 6,
-  },
-
-  // ─── STEP 2: OPTIONS VIEW STYLES ───
-  optionsContainer: {
-    flex: 1,
-    backgroundColor: '#FAFAFA',
-    padding: Spacing.xl,
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.lightGray,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: Spacing.md,
-  },
-  optionsHeader: {
-    marginTop: Spacing.xl,
-    marginBottom: Spacing.xxl,
-  },
-  optionsTitle: {
-    fontSize: 28,
-    fontFamily: Typography.fontFamily.bold,
-    color: Colors.text,
-  },
-  optionsTitleRed: {
-    fontSize: 28,
-    fontFamily: Typography.fontFamily.bold,
-    color: Colors.primary,
-  },
-  buttonStack: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: Spacing.md,
-  },
-  optionBtn: {
-    marginBottom: Spacing.sm,
-  },
-  footerText: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: Spacing.md,
-  },
-  linkText: {
-    ...Typography.caption,
-    color: Colors.primary,
-    fontFamily: Typography.fontFamily.semiBold,
-  },
+  // Options View
+  optionsView: { flex: 1, padding: Spacing.xl, justifyContent: 'space-between' },
+  backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.lightGray, alignItems: 'center', justifyContent: 'center', marginTop: Spacing.md },
+  optionsHeaderBlock: { marginTop: Spacing.xl },
+  optionsHeading: { fontSize: 28, fontFamily: Typography.fontFamily.bold, color: Colors.text },
+  optionsHeadingRed: { fontSize: 28, fontFamily: Typography.fontFamily.bold, color: Colors.primary },
+  optionsBtns: { flex: 1, justifyContent: 'center' },
+  termsText: { ...Typography.caption, color: Colors.textSecondary, textAlign: 'center', marginBottom: Spacing.md },
+  termsLink: { ...Typography.caption, color: Colors.primary, fontFamily: Typography.fontFamily.semiBold },
 });
